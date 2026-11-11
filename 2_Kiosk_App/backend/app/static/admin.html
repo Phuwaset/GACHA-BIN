@@ -67,7 +67,7 @@
   <header>
     <div class="brand">⚙️ GACHA-BIN — Super Admin Portal</div>
     <div style="font-size: 14px; color: var(--text-muted); display: flex; align-items: center; gap: 10px;">
-      <span>บัญชี: <strong id="admin-user" style="color: var(--primary);">phuwaset</strong> (Super Admin)</span>
+      <span>บัญชี: <strong id="admin-user" style="color: var(--primary);">-</strong> (Super Admin)</span>
       <a href="/m" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">📱 ไปหน้ารีโมตมือถือ</a>
       <button class="btn btn-danger" onclick="logout()">ออกจากระบบ</button>
     </div>
@@ -288,15 +288,15 @@
 
       <div class="input-row">
         <label>Username</label>
-        <input type="text" id="admin-login-user" value="phuwaset">
+        <input type="text" id="admin-login-user" placeholder="กรอก Username ของ Admin" autocomplete="off">
       </div>
       <div class="input-row">
         <label>เบอร์โทรศัพท์ (Phone)</label>
-        <input type="tel" id="admin-login-phone" value="0955134781">
+        <input type="tel" id="admin-login-phone" placeholder="กรอกเบอร์โทรศัพท์" autocomplete="off">
       </div>
       <div class="input-row">
         <label>รหัส PIN 6 หลัก</label>
-        <input type="password" id="admin-login-pin" value="123456" placeholder="PIN 6 หลัก">
+        <input type="password" id="admin-login-pin" placeholder="กรอกรหัส PIN 6 หลัก" autocomplete="off">
       </div>
 
       <button class="btn btn-primary" style="width: 100%; height: 46px; margin-top: 10px;" onclick="submitAdminLogin()">
@@ -317,11 +317,15 @@
       try {
         const res = await fetch('/api/admin/rewards', { headers: { 'Authorization': 'Bearer ' + token } });
         if (res.ok) {
+          const savedUser = localStorage.getItem('gacha_user');
+          if (savedUser) document.getElementById('admin-user').innerText = savedUser;
           document.getElementById('modal-admin-login').style.display = 'none';
           loadInventory();
         } else {
           localStorage.removeItem('gacha_token');
+          localStorage.removeItem('gacha_user');
           token = '';
+          document.getElementById('admin-user').innerText = '-';
           document.getElementById('modal-admin-login').style.display = 'flex';
         }
       } catch (e) {
@@ -335,6 +339,11 @@
       const username = document.getElementById('admin-login-user').value.trim();
       const phone = document.getElementById('admin-login-phone').value.trim();
       const pin = document.getElementById('admin-login-pin').value.trim();
+
+      if (!username || !phone || !pin) {
+        err.innerText = 'กรุณากรอก Username, เบอร์โทรศัพท์ และรหัส PIN ให้ครบถ้วน';
+        return;
+      }
 
       try {
         const res = await fetch('/api/auth/login', {
@@ -351,6 +360,9 @@
 
         token = data.token;
         localStorage.setItem('gacha_token', token);
+        localStorage.setItem('gacha_user', data.username);
+        document.getElementById('admin-user').innerText = data.username;
+        document.getElementById('admin-login-pin').value = '';
         document.getElementById('modal-admin-login').style.display = 'none';
         loadInventory();
       } catch (e) {
@@ -610,7 +622,12 @@
 
     function logout() {
       localStorage.removeItem('gacha_token');
+      localStorage.removeItem('gacha_user');
       token = '';
+      document.getElementById('admin-user').innerText = '-';
+      document.getElementById('admin-login-user').value = '';
+      document.getElementById('admin-login-phone').value = '';
+      document.getElementById('admin-login-pin').value = '';
       checkAuth();
     }
 
