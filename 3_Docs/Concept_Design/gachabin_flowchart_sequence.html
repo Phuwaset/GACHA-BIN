@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GACHA-BIN — แผนผังการทำงานและลำดับขั้นตอนระบบ (ว-สอศ-3)</title>
+    <!-- Google Fonts: Sarabun & Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Mermaid.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+      :root {
+        --primary: #0f766e;
+        --primary-dark: #115e59;
+        --primary-light: #ccfbf1;
+        --accent: #f59e0b;
+        --danger: #dc2626;
+        --success: #16a34a;
+        --gray-50: #f8fafc;
+        --gray-100: #f1f5f9;
+        --gray-200: #e2e8f0;
+        --gray-700: #334155;
+        --gray-800: #1e293b;
+        --gray-900: #0f172a;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Sarabun", sans-serif;
+        background-color: #f8fafc;
+        color: var(--gray-800);
+        line-height: 1.6;
+        padding: 24px;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      /* Top Action Bar (Hide in Print) */
+      .action-bar {
+        position: sticky;
+        top: 12px;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--gray-200);
+        border-radius: 12px;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .badge-academic {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 13px;
+        display: inline-block;
+      }
+
+      .btn-print {
+        background-color: var(--primary);
+        color: #ffffff;
+        font-family: "Kanit", sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 8px 18px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-print:hover {
+        background-color: var(--primary-dark);
+        box-shadow: 0 2px 8px rgba(15, 118, 110, 0.3);
+      }
+
+      /* Document Header */
+      header.doc-header {
+        background: #ffffff;
+        border: 1px solid var(--gray-200);
+        border-top: 5px solid var(--primary);
+        border-radius: 12px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      header h1 {
+        font-family: "Kanit", sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 6px;
+      }
+
+      header h2 {
+        font-family: "Kanit", sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--primary);
+        margin-bottom: 12px;
+      }
+
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--gray-100);
+        font-size: 13.5px;
+        color: var(--gray-700);
+      }
+
+      .meta-item strong {
+        color: var(--gray-900);
+      }
+
+      /* Diagram Cards */
+      .diagram-card {
+        background: #ffffff;
+        border: 1px solid var(--gray-200);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 28px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        page-break-inside: avoid;
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--gray-100);
+      }
+
+      .card-title {
+        font-family: "Kanit", sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .part-pill {
+        background-color: var(--gray-900);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 6px;
+      }
+
+      .card-desc {
+        font-size: 14px;
+        color: var(--gray-700);
+        margin-bottom: 20px;
+        background: var(--gray-50);
+        padding: 12px 16px;
+        border-left: 4px solid var(--primary);
+        border-radius: 0 8px 8px 0;
+      }
+
+      .card-desc ul {
+        margin-left: 20px;
+        margin-top: 6px;
+      }
+
+      .mermaid-wrapper {
+        background: #ffffff;
+        border: 1px solid var(--gray-100);
+        border-radius: 8px;
+        padding: 16px;
+        overflow-x: auto;
+        display: flex;
+        justify-content: center;
+      }
+
+      .mermaid {
+        width: 100%;
+        text-align: center;
+      }
+
+      /* Technical Footnote */
+      .tech-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        margin-top: 14px;
+      }
+
+      .tech-table th,
+      .tech-table td {
+        border: 1px solid var(--gray-200);
+        padding: 8px 12px;
+        text-align: left;
+      }
+
+      .tech-table th {
+        background: var(--gray-100);
+        font-family: "Kanit", sans-serif;
+        font-weight: 500;
+        color: var(--gray-900);
+      }
+
+      .code-tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        background: var(--gray-100);
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: var(--primary-dark);
+      }
+
+      /* Footer */
+      footer.doc-footer {
+        text-align: center;
+        font-size: 12.5px;
+        color: var(--gray-700);
+        margin-top: 36px;
+        padding: 18px 0;
+        border-top: 1px solid var(--gray-200);
+      }
+
+      /* Print Specific Styling */
+      @media print {
+        body {
+          background: #ffffff;
+          padding: 0;
+          font-size: 12pt;
+          color: #000000;
+        }
+
+        .action-bar {
+          display: none !important;
+        }
+
+        .container {
+          max-width: 100%;
+          margin: 0;
+        }
+
+        header.doc-header {
+          box-shadow: none;
+          border: 1px solid #ccc;
+          border-top: 4pt solid #0f766e;
+          margin-bottom: 15mm;
+          padding: 15px;
+        }
+
+        .diagram-card {
+          box-shadow: none;
+          border: 1px solid #ddd;
+          margin-bottom: 20mm;
+          page-break-inside: avoid;
+        }
+
+        .page-break {
+          page-break-before: always;
+        }
+
+        .mermaid-wrapper {
+          border: none;
+          padding: 0;
+        }
+
+        @page {
+          size: A4 portrait;
+          margin: 12mm 10mm 12mm 10mm;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Top Action Bar -->
+      <div class="action-bar">
+        <div>
+          <span class="badge-academic"
+            >เอกสารประกอบโครงงาน ว-สอศ-3 | หมวดที่ 5 (30 คะแนน)</span
+          >
+          <span
+            style="font-size: 13px; color: var(--gray-700); margin-left: 10px"
+            >โปรเจกต์ GACHA-BIN Kiosk</span
+          >
+        </div>
+        <button class="btn-print" onclick="window.print()">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path
+              d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+            ></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          พิมพ์เอกสาร / บันทึกเป็น PDF (A4)
+        </button>
+      </div>
+
+      <!-- Document Header -->
+      <header class="doc-header">
+        <h1>GACHA-BIN: แผนผังการทำงานและลำดับขั้นตอนระบบ</h1>
+        <h2>All-in-One Smart Vision Recycling & Gamification Kiosk System</h2>
+        <div class="meta-grid">
+          <div class="meta-item">
+            <strong>ระดับการศึกษา:</strong> ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)
+          </div>
+          <div class="meta-item">
+            <strong>โครงสร้างซอฟต์แวร์:</strong> FastAPI (Backend) + React Kiosk
+            (UI)
+          </div>
+          <div class="meta-item">
+            <strong>ระบบสมองกล:</strong> YOLO11n-cls + OpenCV Computer Vision
+          </div>
+          <div class="meta-item">
+            <strong>ระบบควบคุมกายภาพ:</strong> HAL Driver (RPi.GPIO / Mock
+            Hardware)
+          </div>
+        </div>
+      </header>
+
+      <!-- Part 1: Overall System Architecture -->
+      <section class="diagram-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="part-pill">ส่วนที่ 1</span>
+            <span
+              >ผังโครงสร้างสถาปัตยกรรมระบบภาพรวม (System Architecture
+              Flowchart)</span
+            >
+          </div>
+        </div>
+        <div class="card-desc">
+          แสดงการแบ่งชั้นการทำงานแบบ
+          <strong>Unified Single-Port Host (Port 8000)</strong>
+          ที่รวมการให้บริการหน้าจอแสดงผลหน้าตู้ (Non-Touch Display), เว็บรีโมตบนมือถือผ่านการสแกน QR Code (/m),
+          ระบบควบคุม Dual MG995 Servos และเซนเซอร์วัดระดับขยะ Ultrasonic HC-SR04 สองฝั่ง ไว้บน FastAPI Process เดียว
+        </div>
+        <div class="mermaid-wrapper">
+          <pre class="mermaid">
+flowchart TD
+    subgraph USER_DEV["0. อุปกรณ์ผู้ใช้งาน (User Mobile Client)"]
+        SMARTPHONE["สมาร์ทโฟนผู้ใช้ (Mobile Web Remote: /m)"]
+    end
+
+    subgraph HW["1. ฮาร์ดแวร์ตู้ Kiosk (Hardware Layer)"]
+        DISPLAY["จอแสดงผลหน้าตู้ Non-Touch Display (HDMI)"]
+        CAM["กล้อง USB Camera (ติดตั้งภายในห้องสแกน)"]
+        SERVO1["Servo 1: MG995 รางนำร่องเอียงซ้าย-ขวา (Direction Diverter)"]
+        SERVO2["Servo 2: MG995 ก้านปัดขวดลงถัง (Bottle Pusher Arm)"]
+        US_PLASTIC["Ultrasonic 1: ตรวจระดับถังพลาสติก (HC-SR04)"]
+        US_METAL["Ultrasonic 2: ตรวจระดับถังกระป๋อง (HC-SR04)"]
+        LED["ไฟ LED แสดงสถานะ (Green / Red Ring)"]
+    end
+
+    subgraph HOST["2. Unified Kiosk Host (FastAPI Process on Port 8000)"]
+        subgraph FE["Native Kiosk Web Interface"]
+            STATIC_DISPLAY["HTTP GET / : หน้าจอหลัก Standby & Dashboard"]
+            STATIC_MOBILE["HTTP GET /m : เว็บรีโมตบนมือถือ (QR Login & Spin)"]
+            STATIC_ADMIN["HTTP GET /admin : ระบบจัดการคลัง & ตั้งค่า GPIO"]
+            QR_GEN["HTTP GET /api/qr : สร้างรูป QR Code อัตโนมัติ (OpenCV)"]
+        end
+
+        subgraph BE["Core Backend Services"]
+            SESSION_MGR["Single-Session Lock & Inactivity Timeout (60s)"]
+            API_AUTH["Auth Router: POST /api/auth/login (PIN for Admin)"]
+            WS_ENDPOINT["WebSocket Router: /ws/recycle/{key_id}"]
+            API_GACHA["Gacha Router: 20-Point True Random & Raincheck Engine"]
+            API_ADMIN["Admin Router: Inventory CRUD & GPIO/Servo Tuner"]
+            VISION_ENGINE["Vision Engine: BottleDetector (YOLO11n-cls 4-Stage)"]
+            HAL_LAYER["Hardware Abstraction Layer (HAL Dual Servo & Ultrasonic)"]
+            DB_WAL[("ฐานข้อมูล SQLite WAL (5 Tables: users, history, gpio, rewards, spins)")]
+        end
+    end
+
+    SMARTPHONE -->|สแกน QR Code| QR_GEN
+    SMARTPHONE -->|เปิดใช้งาน /m| STATIC_MOBILE
+    STATIC_MOBILE -->|REST Login / Lock| API_AUTH
+    STATIC_MOBILE -->|REST สุ่มกาชา 20 แต้ม| API_GACHA
+    STATIC_DISPLAY -->|แสดงผลหน้าจอใหญ่| DISPLAY
+
+    API_AUTH -->|ตรวจสอบคิวเดี่ยว| SESSION_MGR
+    SESSION_MGR -->|สลับโหมดหน้าจอ Standby/Active| STATIC_DISPLAY
+
+    CAM -->|Frame 640x480 BGR| VISION_ENGINE
+    WS_ENDPOINT <-->|ประมวลผล 4-Stage & ส่งภาพสด| VISION_ENGINE
+
+    WS_ENDPOINT -->|ตรวจสอบถังเต็มก่อนคัดแยก| HAL_LAYER
+    HAL_LAYER -->|อ่านระยะตรวจจับ (เกณฑ์ 30 cm)| US_PLASTIC
+    HAL_LAYER -->|อ่านระยะตรวจจับ (เกณฑ์ 30 cm)| US_METAL
+
+    WS_ENDPOINT -->|สั่งงานคัดแยก 2 จังหวะ| HAL_LAYER
+    HAL_LAYER -->|จังหวะ 1: เอียงราง 45/135 องศา| SERVO1
+    HAL_LAYER -->|จังหวะ 2: กวาดก้านปัดผลักขวด| SERVO2
+    HAL_LAYER -->|แสดงสถานะ| LED
+
+    API_AUTH -->|บันทึกสมาชิก & สิทธิ์ Super Admin| DB_WAL
+    WS_ENDPOINT -->|บันทึกประวัติ history & แต้มสะสม| DB_WAL
+    API_GACHA -->|หัก 20 แต้ม, จ่ายตั๋ว pending / waiting_restock| DB_WAL
+    API_ADMIN -->|จัดการสต็อก & ตั้งค่า GPIO/องศา Servo| DB_WAL
+            </pre
+          >
+        </div>
+        <table class="tech-table">
+          <thead>
+            <tr>
+              <th>คอมโพเนนต์</th>
+              <th>เทคโนโลยีที่ใช้</th>
+              <th>หน้าที่และความปลอดภัยทางวิศวกรรม</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Unified Host Architecture</strong></td>
+              <td>FastAPI + Uvicorn (Port 8000)</td>
+              <td>
+                ทำหน้าที่เป็นทั้ง Static File Server และ API/WS ในตัวเดียว
+                ทำให้เป็น <strong>Same-Origin 100%</strong> ปลอดปัญหา CORS
+                และประหยัด RAM บน Pi ได้ 150-250MB
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Frontend Kiosk</strong></td>
+              <td>Native Lightweight Web (HTML5 + CSS3 + ES6)</td>
+              <td>
+                ฝังเป็น Static Assets ในตัว FastAPI (พอร์ต 8000) รันบน Chromium Kiosk Mode โดยตรง ปลอดภาระ Node.js และประหยัดหน่วยความจำ (RAM) บน Raspberry Pi
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Database Storage</strong></td>
+              <td>SQLite 3 + SQLAlchemy (WAL Mode)</td>
+              <td>
+                เปิดใช้
+                <span class="code-tag">PRAGMA journal_mode=WAL</span>
+                ป้องกันปัญหา Lock Database ขณะสตรีมข้อมูล
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="page-break"></div>
+
+      <!-- Part 2: 4-Stage Smart Vision Invariants -->
+      <section class="diagram-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="part-pill">ส่วนที่ 2</span>
+            <span
+              >ผังตรรกะความปลอดภัยการตรวจจับขยะ 4 ขั้นตอน (4-Stage Smart Vision
+              Invariants)</span
+            >
+          </div>
+        </div>
+        <div class="card-desc">
+          ขั้นตอนควบคุมความถูกต้องของระบบตรวจจับตามหลักวิศวกรรมป้องกันการโกงแต้ม
+          (Anti-Cheat &amp; Noise Immunity)
+          <ul>
+            <li>
+              <strong>Stage 1 (Presence Gating):</strong>
+              ตรวจวัดความต่างของพื้นหลัง ตัด False Positive จากห้องว่าง (0%
+              Error)
+            </li>
+            <li>
+              <strong>Stage 2 (Temporal Dwell Hold):</strong>
+              วัตถุต้องนิ่งคงที่เป็นเวลา &ge; 1.2 วินาที (&ge; 8 เฟรมต่อเนื่อง)
+            </li>
+            <li>
+              <strong>Stage 3 (YOLO Inference):</strong> โมเดล YOLO11n-cls
+              ตรวจสอบค่าความมั่นใจ (Confidence &ge; 88%)
+            </li>
+            <li>
+              <strong>Stage 4 (Item Exit Gate):</strong> ล็อกการให้แต้มซ้ำ
+              (<span class="code-tag">waiting_for_exit</span>)
+              จนกว่าขยะจะถูกปล่อยลงถังจริง
+            </li>
+          </ul>
+        </div>
+        <div class="mermaid-wrapper">
+          <pre class="mermaid">
+flowchart TD
+    START(["รับเฟรมภาพจากกล้อง (read_frame)"]) --> CHK_FRAME{"เฟรมว่าง หรือ None หรือไม่?"}
+    CHK_FRAME -- "ใช่ (กล้องหลุด)" --> DROP_FRAME["ข้ามรอบ ไม่ประมวลผล"]
+    CHK_FRAME -- "ไม่ใช่" --> GRAY["แปลงภาพ Grayscale + Gaussian Blur (21,21)"]
+
+    GRAY --> INIT_BG{"มีภาพพื้นหลัง Baseline หรือยัง?"}
+    INIT_BG -- "ยังไม่มี" --> SET_BG["บันทึกภาพเฟรมนี้เป็น _bg Baseline"] --> RET_EMPTY["ส่งสถานะ: empty chamber"]
+    INIT_BG -- "มีแล้ว" --> CALIB{"วอร์มอัปครบ 5 เฟรมหรือยัง?"}
+    CALIB -- "ยังไม่ครบ" --> ACC_BG["ปรับค่าเฉลี่ย _bg (weight=0.4)"] --> RET_EMPTY
+    CALIB -- "ครบแล้ว" --> DIFF["คำนวณ Frame Delta (cv2.absdiff) & พื้นที่พิกเซลเปลี่ยน"]
+
+    DIFF --> STAGE1{"Stage 1: มีวัตถุในช่องทิ้งหรือไม่?<br/>(diff_score >= 8.0 หรือ change >= 3%)"}
+    STAGE1 -- "ไม่มี (ช่องว่าง)" --> ADAPT_BG["ค่อยๆ ปรับแสงพื้นหลัง (accumulate 0.05)"]
+    ADAPT_BG --> CHK_EXIT_LOCK{"เดิมติดล็อก waiting_for_exit อยู่หรือไม่?"}
+    CHK_EXIT_LOCK -- "ใช่" --> UNLOCK["ปลดล็อก waiting_for_exit = False<br/>(ยืนยันขยะชิ้นก่อนหน้าถูกทิ้งลงถังแล้ว)"]
+    CHK_EXIT_LOCK -- "ไม่ใช่" --> RESET_CAND["รีเซ็ตตัวนับ Candidate"]
+    UNLOCK --> RESET_CAND --> RET_EMPTY
+
+    STAGE1 -- "มีวัตถุ (Present)" --> STAGE4_LOCK{"Stage 4 Check: กำลังรอขยะเดิมออกจากช่องทิ้งหรือไม่?"}
+    STAGE4_LOCK -- "ใช่ (ยังไม่เอาออก)" --> BLOCK_DUPE["บล็อกการให้คะแนนซ้ำ (Hold State)"]
+    STAGE4_LOCK -- "ไม่ใช่" --> YOLO_INF["Stage 3: ส่งภาพเข้าประมวลผล YOLO11n-cls (imgsz=224)"]
+
+    YOLO_INF --> CHK_CONF{"ความมั่นใจ >= 88%<br/>และเป็น plastic หรือ metal?"}
+    CHK_CONF -- "ไม่ถึงเกณฑ์" --> GLITCH{"พบเฟรมหลุดต่อเนื่อง > 2 เฟรม?"}
+    GLITCH -- "ใช่" --> RESET_CAND
+    GLITCH -- "ไม่ใช่ (Noise สั้นๆ)" --> KEEP_CAND["คงสถานะ Candidate เดิมไว้ชั่วคราว"]
+
+    CHK_CONF -- "ผ่านเกณฑ์" --> STAGE2{"Stage 2: วัตถุนิ่งครบเงื่อนไขหรือไม่?<br/>(เวลานิ่ง >= 1.2s และ เฟรมต่อเนื่อง >= 8 เฟรม)"}
+    STAGE2 -- "ยังไม่ครบ" --> ACC_TIME["เพิ่มเวลานับถอยหลัง & อัปเดต Progress Bar"]
+    STAGE2 -- "ครบเงื่อนไขแล้ว" --> CONFIRM_ITEM["ยืนยันชนิดขยะสำเร็จ (plastic: +1 แต้ม, metal: +2 แต้ม)"]
+
+    CONFIRM_ITEM --> LOCK_EXIT["เปิดล็อก Stage 4: waiting_for_exit = True"]
+    LOCK_EXIT --> DISPATCH_EVENT(["ส่ง Event: ITEM_DETECTED & บันทึก SQLite WAL"])
+            </pre>
+        </div>
+        <table class="tech-table">
+          <thead>
+            <tr>
+              <th>ด่านความปลอดภัย</th>
+              <th>เงื่อนไขตัวเลข (Invariant Values)</th>
+              <th>กลไกป้องกันทางเทคนิค (The "Why")</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Stage 1: Presence Gate</strong></td>
+              <td>
+                <span class="code-tag">diff_threshold &ge; 8.0</span> หรือ
+                <span class="code-tag">change &ge; 3.0%</span>
+              </td>
+              <td>
+                ป้องกันไม่ให้โมเดล AI พยายามเดาภาพพื้นหลังห้องว่างเปล่า
+                ซึ่งอาจทำให้เกิด False Positive
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Stage 2: Temporal Dwell</strong></td>
+              <td>
+                <span class="code-tag">hold_duration &ge; 1.2s</span> และ
+                <span class="code-tag">consecutive &ge; 8 frames</span>
+              </td>
+              <td>
+                ป้องกันภาพกระตุก หรือมือผู้ใช้ที่ยื่นผ่านช่องทิ้งชั่วคราว
+                โดยต้องวางวัตถุให้นิ่งจริง
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Stage 3: YOLO Inference</strong></td>
+              <td>
+                <span class="code-tag">conf_threshold &ge; 0.88 (88%)</span>
+              </td>
+              <td>
+                กรองวัตถุแปลกปลอม เช่น ขยะทั่วไป กล่องโฟม
+                หรือสิ่งที่ไม่ใช่ขวดพลาสติก/กระป๋องโลหะ
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Stage 4: Item Exit Gate</strong></td>
+              <td>
+                <span class="code-tag">waiting_for_exit = True</span>
+                จนกว่าจะตรวจพบห้องว่าง
+              </td>
+              <td>
+                ป้องกันการถือขวดชิ้นเดิมค้างไว้เพื่อให้ระบบนับแต้มเบิ้ลหลายรอบ
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="page-break"></div>
+
+      <!-- Part 3: Realtime Recycling Session Sequence -->
+      <section class="diagram-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="part-pill">ส่วนที่ 3</span>
+            <span
+              >แผนภาพลำดับเวลาการตรวจจับขยะและการคัดแยกด้วย Dual Servos (Recycling & Dual-Servo Sorting Sequence)</span
+            >
+          </div>
+        </div>
+        <div class="card-desc">
+          แสดงกระบวนการเปิดเซสชันผ่านการสแกน QR Code บนมือถือ (Single-Session Lock) การตรวจจับขวดด้วย AI Vision 4-Stage
+          การตรวจวัดระดับถังขยะด้วย Ultrasonic HC-SR04 และกลไกคัดแยก 2 จังหวะด้วยเซอร์โวมอเตอร์ MG995 จำนวน 2 ตัว
+        </div>
+        <div class="mermaid-wrapper">
+          <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as ผู้ใช้งาน
+    participant Mobile as สมาร์ทโฟน (/m)
+    participant Kiosk as หน้าจอใหญ่ Kiosk (HDMI)
+    participant WS as Backend (/ws/recycle)
+    participant Cam as CameraManager
+    participant Det as BottleDetector (YOLO)
+    participant HAL as Hardware (Dual Servo & Ultrasonic)
+    participant DB as ฐานข้อมูล SQLite (WAL)
+
+    User->>Mobile: สแกน QR Code หน้าตู้ & กรอกชื่อ/เบอร์โทร
+    Mobile->>WS: ส่งคำขอเข้าใช้งาน POST /api/auth/login
+    activate WS
+    WS->>DB: ตรวจสอบ/ลงทะเบียนผู้ใช้ & สิทธิ์
+    WS->>WS: ตรวจสอบ Single-Session Lock (คิวเดี่ยว)
+    WS-->>Mobile: ยืนยันสิทธิ์สำเร็จ (Token & Session Status)
+    WS-->>Kiosk: สลับหน้าจอจาก Standby เข้าสู่ Active Dashboard
+    deactivate WS
+
+    Kiosk->>WS: เชื่อมต่อ WebSocket (/ws/recycle/{key_id})
+    activate WS
+    WS->>Cam: สั่งเปิดกล้อง start_session()
+    WS->>HAL: สั่งเปิดไฟสถานะ trigger_led("scanning")
+    WS-->>Kiosk: ส่ง EVENT: SESSION_STARTED (เริ่มนับถอยหลัง 60 วินาที)
+
+    loop วงรอบสตรีมภาพและตรวจจับ (~15 FPS)
+        WS->>Cam: เรียกอ่านเฟรม read_frame()
+        Cam-->>WS: ส่งกลับเฟรมภาพ (BGR Frame)
+        WS->>Det: ส่งเฟรมเข้าประมวลผล process_frame(frame)
+        Det-->>WS: ส่งกลับผลลัพธ์ (คลาส, ความมั่นใจ, Progress)
+        WS-->>Kiosk: ส่ง PREVIEW_FRAME (ภาพสด Base64 + กล่อง AI)
+
+        opt เมื่อผ่านเกณฑ์ 4-Stage Invariants ครบถ้วน (Plastic/Metal)
+            Det-->>WS: ส่ง Event ยืนยันพบวัตถุ
+            WS->>HAL: ตรวจสอบระดับถังขยะผ่าน Ultrasonic (read_bin_distance)
+            HAL-->>WS: ส่งค่าระยะความสูงขยะ (cm)
+
+            alt กรณีถังขยะเป้าหมายเต็ม (ระยะ <= 30 cm)
+                WS->>HAL: สั่งไฟแดงกระพริบ trigger_led("full")
+                WS-->>Kiosk: ส่ง EVENT: BIN_FULL_WARNING (ไม่หมุนเซอร์โว & ไม่เพิ่มแต้ม)
+            else กรณีถังขยะยังไม่เต็ม (ระยะ > 30 cm)
+                WS->>HAL: จังหวะ 1: สั่ง Servo 1 เอียงราง 45/135 องศา
+                WS->>HAL: จังหวะ 2: สั่ง Servo 2 ปัดขวดออกจากรางลงถัง
+                WS->>HAL: คืนตำแหน่ง Servo 2 Home & Servo 1 ตั้งตรง 90 องศา
+                WS->>DB: บันทึกประวัติ history & เพิ่มแต้ม (+1 พลาสติก, +2 โลหะ)
+                WS-->>Kiosk: ส่ง EVENT: ITEM_DETECTED & แสดงการ์ตูนน่ารักหน่วงเวลา 5 วินาที
+                WS-->>Mobile: อัปเดตแต้มสะสมล่าสุดแบบเรียลไทม์
+                WS->>WS: รีเซ็ตเวลานับถอยหลัง Inactivity Timeout กลับเป็น 60 วินาที
+            end
+        end
+    end
+
+    alt ผู้ใช้กดปุ่ม "ออกจากระบบ" บนมือถือ หรือ หมดเวลา 60 วินาที
+        User->>Mobile: กดปุ่ม "เสร็จสิ้น / ออกจากระบบ"
+        Mobile->>WS: ส่งคำขอ POST /api/auth/session/logout
+    else หมดเวลาไม่มีความเคลื่อนไหว (Inactivity Timeout 60s)
+        WS->>WS: นับเวลาถอยหลังถึง 0 วินาที
+        WS-->>Kiosk: ส่ง EVENT: TIMEOUT
+    end
+
+    WS->>HAL: สั่งดับไฟสถานะ trigger_led("idle")
+    WS->>Cam: คืนทรัพยากรกล้อง stop_session()
+    WS-->>Kiosk: สลับหน้าจอกลับสู่ Standby QR Code พร้อมรับผู้ใช้คนถัดไป
+    deactivate WS
+            </pre
+          >
+        </div>
+      </section>
+
+      <div class="page-break"></div>
+
+      <!-- Part 4: Gacha Spin Sequence -->
+      <section class="diagram-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="part-pill">ส่วนที่ 4</span>
+            <span
+              >แผนภาพลำดับเวลาการหมุนรางวัลกาชาปอง 20 แต้ม (Gacha True-Random & Raincheck Sequence)</span
+            >
+          </div>
+        </div>
+        <div class="card-desc">
+          แสดงขั้นตอนการสุ่มรางวัล True Random 3 ระดับ (Special 5%, Rare 25%, Common 70%) การออกรหัสตั๋วรับรางวัล (Claim Code)
+          ระบบจองสิทธิ์รับของย้อนหลังเมื่อของหมดชั่วคราว (Raincheck Flow: waiting_restock) และการยืนยันส่งมอบของรางวัลโดย Super Admin
+        </div>
+        <div class="mermaid-wrapper">
+          <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as ผู้ใช้งาน
+    participant Mobile as สมาร์ทโฟน (/m)
+    participant API as FastAPI (/api/gacha/spin)
+    participant DB as ฐานข้อมูล SQLite (WAL)
+    actor Admin as ผู้ดูแล (Super Admin: /admin)
+
+    User->>Mobile: กดปุ่ม "หมุนสุ่มกาชาปอง" (ใช้ 20 แต้ม)
+    Mobile->>API: ส่งคำขอ POST /api/gacha/spin (พร้อม Bearer Token)
+    activate API
+
+    API->>DB: ตรวจสอบแต้มสะสมของผู้ใช้ (SELECT score)
+    DB-->>API: คืนค่าแต้มสะสมปัจจุบัน
+
+    alt กรณีแต้มสะสมไม่เพียงพอ (< 20 แต้ม)
+        API-->>Mobile: คืนค่า HTTP 400 Bad Request ("แต้มสะสมไม่เพียงพอ ต้องการ 20 แต้ม")
+        Mobile-->>User: แสดงการแจ้งเตือนให้หยอดขวดเพิ่ม
+    else กรณีแต้มสะสมเพียงพอ (>= 20 แต้ม)
+        API->>DB: หักคะแนนผู้ใช้ 20 แต้ม (score -= 20)
+        API->>API: สุ่มทศนิยมแท้จริง True Random Float R ในช่วง [0, 1)
+        Note over API: R < 0.05: พิเศษ (Special 5%)<br/>0.05 <= R < 0.30: แรร์ (Rare 25%)<br/>0.30 <= R < 1.00: ทั่วไป (Common 70%)
+
+        API->>DB: ตรวจสอบสต็อกของรางวัลใน Tier นั้น (stock > 0)
+        
+        alt กรณีมีของรางวัลในสต็อก (In-Stock)
+            API->>DB: หักสต็อกรางวัล (-1) และสร้างบันทึก gacha_spins สถานะ 'pending'
+            API->>API: สร้างรหัสตั๋วรับรางวัล เช่น RWD-8F3A
+            API->>DB: COMMIT Transaction บันทึกข้อมูลสมบูรณ์
+            API-->>Mobile: คืนค่าผลสุ่ม { status: 'won', reward: '...', claim_code: 'RWD-8F3A' }
+            Mobile-->>User: แสดงตั๋วรับรางวัลและรหัสอ้างอิงบนหน้าจอมือถือ
+        else กรณีของรางวัลระดับนั้นหมดสต็อกชั่วคราว (Raincheck Flow)
+            API->>DB: สร้างบันทึก gacha_spins สถานะ 'waiting_restock' ล็อกสิทธิ์ไว้ในไอดี
+            API->>API: สร้างรหัสตั๋วรับรางวัล เช่น RWD-WAIT-8F3A
+            API->>DB: COMMIT Transaction บันทึกสิทธิ์ค้างรับ
+            API-->>Mobile: คืนค่าผลสุ่ม { status: 'waiting_restock', claim_code: '...' }
+            Mobile-->>User: แสดงการ์ตูนขออภัยและแจ้งเตือนว่าสามารถมารับได้ทันทีเมื่อเจ้าหน้าที่เติมสต็อก
+        end
+    end
+    deactivate API
+
+    opt เมื่อเจ้าหน้าที่นำของรางวัลมาเติมและส่งมอบของรางวัลจริง
+        Admin->>DB: เพิ่มสต็อกของรางวัลผ่านหน้าเว็บ /admin
+        DB->>DB: ระบบ FIFO อัปเกรดตั๋ว 'waiting_restock' เป็น 'pending' อัตโนมัติ
+        User->>Admin: ยื่นแสดงรหัสตั๋ว Claim Code จากมือถือให้เจ้าหน้าที่
+        Admin->>API: กดยืนยันการส่งมอบ POST /api/admin/claims/{code}/handover
+        API->>DB: อัปเดตสถานะตั๋วเป็น 'claimed' (รับของแล้ว)
+        Admin-->>User: ส่งมอบของรางวัลจริงถึงมือผู้ใช้งานอย่างโปร่งใส
+    end
+          </pre>
+        </div>
+        <table class="tech-table">
+          <thead>
+            <tr>
+              <th>ลำดับรางวัล (Tier)</th>
+              <th>โอกาสออก (Drop Rate)</th>
+              <th>ตัวอย่างของรางวัลในระบบ</th>
+              <th>รูปแบบการส่งมอบรางวัล (Handover Verification)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color: #ec4899;">Special</strong></td>
+              <td><strong>5%</strong> (0.05)</td>
+              <td>โมเดลลูฟี่ วันพีซ, Art Toy Limited, หมวกฟางลูฟี่, ของแรร์ Miniso</td>
+              <td>ออกรหัสตั๋ว Claim Code แสดงบนมือถือ (Super Admin กดยืนยันจ่ายของใน /admin)</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--accent);">Rare</strong></td>
+              <td><strong>25%</strong> (0.25)</td>
+              <td>กระเป๋าสตางค์, กระเป๋าดินสอ, ชุดเครื่องเขียนเน้นอุปกรณ์การเรียน</td>
+              <td>ออกรหัสตั๋ว Claim Code แสดงบนมือถือ (Super Admin กดยืนยันจ่ายของใน /admin)</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--primary);">Common</strong></td>
+              <td><strong>70%</strong> (0.70)</td>
+              <td>พวงกุญแจรีไซเคิล, กิ๊ฟช็อปน่ารักทั่วไป, สติกเกอร์ GACHA-BIN</td>
+              <td>ออกรหัสตั๋ว Claim Code แสดงบนมือถือ (Super Admin กดยืนยันจ่ายของใน /admin)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <session class="">
+        : รายงานการแก้ไขโค้ดปิดช่องโหว่ (เสร็จสมบูรณ์) ปิดช่องโหว่ข้อ 1
+        (SIMULATE_DETECT Guard): ใน stream.py เพิ่มเงื่อนไขตรวจสอบ
+        HARDWARE_MODE: หากไม่ได้ตั้งค่าเป็น mock (เช่น รันบน Raspberry Pi จริง)
+        คำสั่งจำลองแต้มจะถูกปฏิเสธและบันทึก Warning Log ทันที
+        ป้องกันการแฮกปั๊มแต้มผ่าน WebSocket ปิดช่องโหว่ข้อ 2 (Gacha Atomic
+        Rollback on Hardware Fail): ใน gacha.py
+        ปรับการทำงานให้สั่งหมุนมอเตอร์ฮาร์ดแวร์ hw.dispense_gacha() ก่อน
+        หากมอเตอร์ติดขัดหรือจ่ายของไม่สำเร็จ ระบบจะสั่ง db.rollback() ทันที
+        แต้มของผู้ใช้จะไม่ถูกหัก สต็อกไม่ลด และแจ้งเตือนบนหน้าจอว่ากลไกขัดข้อง
+        ปิดปัญหา "กินแต้มแต่ของไม่ออก" 100% ปิดช่องโหว่ข้อ 5 (Zombie Port Kill):
+        ใน run_kiosk.sh เพิ่มคำสั่ง fuser -k 8000/tcp 2>/dev/null || true
+        ก่อนสตาร์ต Uvicorn เพื่อการันตีว่าพอร์ต 8000 จะว่างเสมอ
+        ไม่แครชจากโพรเซสตกค้าง ส่วนที่ 2: เนื้อหาสำหรับใส่ใน "บทที่ 5
+        ข้อเสนอแนะ" (รูปเล่ม ว-สอศ-3)
+        ข้อเสนอแนะด้านวิศวกรรมกลไกและระบบป้องกันการทุจริต (Anti-Cheat Mechanical
+        Integration) จากผลการทดสอบระบบประมวลผลภาพ (Computer Vision) ด้วย
+        Invariants 4 ขั้นตอน พบว่าระบบสามารถจำแนกขยะได้อย่างแม่นยำสูง
+        อย่างไรก็ตาม ในมิติของความปลอดภัยเชิงกายภาพหน้าตู้ (Physical Security)
+        ยังมีความเสี่ยงกรณีผู้ใช้งานยื่นขวดเข้ามาเพื่อให้ระบบบันทึกคะแนน
+        แล้วดึงขวดชิ้นเดิมกลับออกทางประตูหน้า (Pull-back Re-entry) ดังนั้น
+        ในการพัฒนาต่อยอดสู่ระดับเชิงพาณิชย์ (Production/Commercial Scale)
+        จึงมีข้อเสนอแนะเชิงกลไกดังนี้: การติดตั้งกลไกลิ้นล็อกทางเดียว (Passive
+        Gravity One-Way Flap):
+        ออกแบบแผ่นลิ้นบานพับที่ปากช่องทิ้งแบบเปิดเข้าด้านในได้อย่างเดียว
+        โดยใช้แรงโน้มถ่วงหรือสปริงดึงกลับ เมื่อผู้ใช้ผลักขวดผ่านบานพับเข้าไปแล้ว
+        บานพับจะดีดปิดล็อกขอบทันที
+        ทำให้ไม่สามารถล้วงมือหรือดึงขวดกลับคืนออกมาได้
+        ระบบห้องกักขยะสองจังหวะร่วมกับเซนเซอร์อินฟราเรด (Two-Stage Interlocking
+        Chamber with IR Drop Sensor): พัฒนาห้องสแกนเป็นระบบ 2 ประตู
+        โดยเมื่อกล้องสแกนยืนยันชนิดขวดเสร็จสิ้น ประตูหน้าจะถูกล็อกด้วยโซลินอยด์
+        จากนั้นประตูด้านล่าง (Trapdoor) จะเปิดออกให้ขวดร่วงลงสู่ถังพักด้านล่าง
+        โดยมีเซนเซอร์กั้นแสงอินฟราเรด (IR Break-Beam Sensor)
+        ตรวจจับยืนยันว่าขยะตกลงสู่ถังขยะจริง จึงจะทำการอนุมัติคะแนนสะสม
+        และเปิดประตูหน้าเพื่อรับขวดใบถัดไป บทพูดสำหรับตอบคำถามกรรมการปากเปล่า
+        (Pitching Defense) เมื่อกรรมการถามว่า: "ถ้าคนยื่นขวดเข้าไป
+        พอแต้มขึ้นแล้วดึงขวดกลับมาหยอดใหม่ ระบบจะรู้ไหม?"
+        ให้น้องตอบแบบมั่นใจตามนี้ได้เลยครับ: "ในระดับซอฟต์แวร์ ทีมเราได้ออกแบบ
+        Stage 4 (Exit Gate) และ Cooldown Debounce
+        ไว้เพื่อล็อกไม่ให้นับแต้มซ้ำจนกว่าช่องสแกนจะว่างครับ
+        แต่ในทางวิศวกรรมเราตระหนักดีว่า
+        ซอฟต์แวร์เพียงอย่างเดียวไม่สามารถทดแทนกลไกทางกายภาพได้ 100%
+        ทีมเราจึงได้ออกแบบทางแก้เชิงเมคคาทรอนิกส์ไว้ในข้อเสนอแนะบทที่ 5
+        คือการใช้ ฝาพับลิ้นทางเดียว (One-way Flap) และ IR Drop Sensor
+        ยืนยันการตกจริง
+        เพื่อให้ระบบตู้มีความสมบูรณ์แบบระดับตู้ใช้งานจริงในที่สาธารณะครับ"
+        -------------------------------------------------------------
+        "สถาปัตยกรรมส่วนติดต่อผู้ใช้ (Frontend Architecture) ของตู้ GACHA-BIN
+        ถูกออกแบบบนแนวคิด Zero-Dependency Lightweight Web Architecture (HTML5 /
+        Vanilla ES6+ / CSS Variables) เพื่อขจัดปัญหา Overhead ของ JavaScript
+        Frameworks (เช่น React/Vue) ซึ่งไม่จำเป็นสำหรับ Sequential Flow Kiosk
+        การตัดสินใจทางวิศวกรรมนี้ช่วยลดการใช้หน่วยความจำ (RAM) บนบอร์ด Raspberry
+        Pi ได้มากกว่า 200MB และคืนทรัพยากรประมวลผลทั้งหมดให้กับโมเดลสมองกล
+        YOLO11 ทำให้การจำแนกประเภทขยะแบบ Real-time มีอัตราความหน่วงต่ำสุด
+        (Sub-100ms Latency)"
+      </session>
+
+      <!-- Document Footer -->
+      <footer class="doc-footer">
+        <p>
+          <strong
+            >โครงการพัฒนานวัตกรรมสิ่งประดิษฐ์คนรุ่นใหม่ (ว-สอศ-3)
+            ประจำปีการศึกษา 2569</strong
+          >
+        </p>
+        <p>
+          ระบบตู้รีไซเคิลอัจฉริยะคัดแยกขวดพลาสติกและกระป๋องโลหะด้วยสมองกลวิทัศน์
+          (GACHA-BIN)
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      // Initialize Mermaid with clean configuration
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "default",
+        securityLevel: "loose",
+        flowchart: {
+          useMaxWidth: true,
+          htmlLabels: true,
+          curve: "basis",
+        },
+        sequence: {
+          useMaxWidth: true,
+          showSequenceNumbers: true,
+          actorMargin: 50,
+          boxMargin: 10,
+          boxTextMargin: 5,
+          noteMargin: 10,
+          messageMargin: 35,
+        },
+      });
+    </script>
+  </body>
+</html>

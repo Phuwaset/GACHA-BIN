@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GACHA-BIN Smart Vision Kiosk (Display Screen)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800;900&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0a0f1d;
+      --bg-surface: #111827;
+      --bg-card: #1f2937;
+      --bg-card-hover: #374151;
+      --border: #374151;
+      --border-accent: #059669;
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.35);
+      --accent-cyan: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-amber: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --font-display: 'Kanit', sans-serif;
+      --font-body: 'Prompt', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-body);
+    }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Top Kiosk Header */
+    header {
+      height: 80px;
+      padding: 0 32px;
+      background: rgba(17, 24, 39, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      font-size: 38px;
+      line-height: 1;
+      filter: drop-shadow(0 0 10px var(--primary-glow));
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .header-info-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .pill-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .clock-badge {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+
+    /* View Sections */
+    .view-screen {
+      flex: 1;
+      display: none;
+      padding: 32px 48px;
+      position: relative;
+    }
+
+    .view-screen.active {
+      display: flex;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.99); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* =========================================================================
+       VIEW 1: STANDBY SCREEN (QR Scan + Showcase + Bin Status)
+       ========================================================================= */
+    #view-standby {
+      flex-direction: column;
+      gap: 24px;
+      justify-content: space-between;
+    }
+
+    .standby-main-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    /* Left QR Card */
+    .qr-card {
+      background: var(--bg-surface);
+      border: 2px solid var(--border-accent);
+      box-shadow: 0 0 35px var(--primary-glow);
+      border-radius: 32px;
+      padding: 36px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .qr-tag {
+      position: absolute;
+      top: -16px;
+      background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 6px 20px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .qr-box {
+      width: 256px;
+      height: 256px;
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      margin: 18px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .qr-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .qr-instruction {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .qr-subtext {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Right Showcase Carousel */
+    .showcase-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 32px 36px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .showcase-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .showcase-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent-amber);
+    }
+
+    .showcase-cost-badge {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid var(--accent-amber);
+      color: var(--accent-amber);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 15px;
+      padding: 6px 16px;
+      border-radius: 20px;
+    }
+
+    .rewards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      flex: 1;
+      align-items: center;
+    }
+
+    .reward-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      height: 100%;
+      justify-content: center;
+      transition: transform 0.3s, border-color 0.3s;
+      position: relative;
+    }
+
+    .reward-card.tier-special {
+      border: 2px solid #ec4899;
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.25);
+    }
+
+    .reward-card.tier-rare {
+      border: 2px solid var(--accent-purple);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+    }
+
+    .reward-tier-badge {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .badge-special { background: #ec4899; color: #fff; }
+    .badge-rare { background: var(--accent-purple); color: #fff; }
+    .badge-common { background: var(--primary); color: #fff; }
+
+    .reward-icon {
+      font-size: 54px;
+      margin-bottom: 10px;
+    }
+
+    .reward-name {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .reward-rate {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Bottom Bin Status Bar */
+    .bin-status-bar {
+      height: 64px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .bin-status-group {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .bin-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .status-dot.full {
+      background: var(--danger);
+      box-shadow: 0 0 10px var(--danger);
+      animation: pulseAlert 1s infinite alternate;
+    }
+
+    @keyframes pulseAlert {
+      from { opacity: 0.6; }
+      to { opacity: 1; }
+    }
+
+    /* =========================================================================
+       VIEW 2: ACTIVE RECYCLE SESSION
+       ========================================================================= */
+    #view-active {
+      gap: 28px;
+    }
+
+    .active-camera-panel {
+      flex: 1.25;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .camera-viewport {
+      flex: 1;
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .camera-viewport img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .active-dashboard-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .user-banner-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15));
+      border: 2px solid var(--primary);
+      border-radius: 24px;
+      padding: 24px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-greeting {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .score-total-display {
+      font-family: var(--font-mono);
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeout-bar-container {
+      width: 100%;
+      height: 10px;
+      background: var(--bg-card);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .timeout-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--danger), var(--accent-amber), var(--primary));
+      width: 100%;
+      transition: width 1s linear;
+    }
+
+    /* 5-Second Cartoon Feedback Modal */
+    #cartoon-modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 15, 29, 0.92);
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 100;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .cartoon-char {
+      font-size: 130px;
+      animation: bounce 0.8s infinite alternate ease-in-out;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-25px); }
+    }
+
+    .cartoon-title {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--primary);
+      margin: 16px 0 8px;
+      text-shadow: 0 0 25px var(--primary-glow);
+    }
+
+    .cartoon-sub {
+      font-family: var(--font-display);
+      font-size: 24px;
+      color: #ffffff;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <span class="brand-logo">♻️</span>
+        <div>
+          <div class="brand-title">GACHA-BIN</div>
+          <div class="brand-subtitle">Smart Vision Recycling Kiosk</div>
+        </div>
+      </div>
+
+      <div class="header-info-bar">
+        <div class="pill-badge">
+          <span>📶 Wi-Fi:</span>
+          <strong id="wifi-ssid" style="color: var(--accent-cyan);">CONNECTING...</strong>
+        </div>
+        <div class="pill-badge">
+          <span>🌐 IP:</span>
+          <strong id="kiosk-ip" style="color: var(--primary);">0.0.0.0</strong>
+        </div>
+        <div class="pill-badge">
+          <span class="clock-badge" id="clock-display">00:00:00</span>
+          <span style="color: var(--text-muted); font-size: 13px;" id="date-display">01/01/26</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===================================================================
+         VIEW 1: STANDBY SCREEN (Default Screen)
+         =================================================================== -->
+    <main id="view-standby" class="view-screen active">
+      <div class="standby-main-grid">
+        <!-- Left QR Code Card -->
+        <div class="qr-card">
+          <div class="qr-tag">SCAN TO PLAY</div>
+          <div class="qr-box">
+            <img id="qr-image" src="/api/qr" alt="Scan QR to Login">
+          </div>
+          <h2 class="qr-instruction">สแกน QR Code ด้วยมือถือ</h2>
+          <p class="qr-subtext">เพื่อลงทะเบียน / เปิดเซสชันสะสมแต้มหน้าตู้</p>
+        </div>
+
+        <!-- Right Rewards Showcase -->
+        <div class="showcase-container">
+          <div class="showcase-header">
+            <div class="showcase-title">
+              <span>🎁</span>
+              <span>ของรางวัลสุดพิเศษ (Gacha Rewards)</span>
+            </div>
+            <div class="showcase-cost-badge">✨ 20 แต้ม / สุ่ม 1 ครั้ง</div>
+          </div>
+
+          <div class="rewards-grid">
+            <!-- Special Tier -->
+            <div class="reward-card tier-special">
+              <span class="reward-tier-badge badge-special">SPECIAL 5%</span>
+              <div class="reward-icon">👒</div>
+              <div class="reward-name">โมเดลลูฟี่ / หมวกฟาง</div>
+              <div class="reward-rate">Art Toy แรร์ห้างดัง Miniso</div>
+            </div>
+
+            <!-- Rare Tier -->
+            <div class="reward-card tier-rare">
+              <span class="reward-tier-badge badge-rare">RARE 25%</span>
+              <div class="reward-icon">🎒</div>
+              <div class="reward-name">กระเป๋าสตางค์ / ดินสอ</div>
+              <div class="reward-rate">ชุดอุปกรณ์เครื่องเขียนรักษ์โลก</div>
+            </div>
+
+            <!-- Common Tier -->
+            <div class="reward-card">
+              <span class="reward-tier-badge badge-common">COMMON 70%</span>
+              <div class="reward-icon">🔑</div>
+              <div class="reward-name">พวงกุญแจรีไซเคิล</div>
+              <div class="reward-rate">กิ๊ฟช็อปและสติกเกอร์น่ารัก</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Ultrasonic Bin Status -->
+      <footer class="bin-status-bar">
+        <div class="bin-status-group">
+          <div class="bin-indicator">
+            <div id="dot-plastic" class="status-dot"></div>
+            <span>ถังขวดพลาสติก (Plastic):</span>
+            <strong id="text-plastic-status" style="color: var(--primary);">พร้อมรับขยะ</strong>
+          </div>
+          <div class="bin-indicator">
+            <div id="dot-metal" class="status-dot"></div>
+            <span>ถังกระป๋องโลหะ (Metal):</span>
+            <strong id="text-metal-status" style="color: var(--primary);">พร้อมรับขยะ</strong>
+          </div>
+        </div>
+        <div style="font-size: 13.5px; color: var(--text-muted);">
+          ระบบคัดแยกอัตโนมัติด้วย Dual MG995 Servos & HC-SR04 Sensors
+        </div>
+      </footer>
+    </main>
+
+    <!-- ===================================================================
+         VIEW 2: ACTIVE SESSION SCREEN
+         =================================================================== -->
+    <main id="view-active" class="view-screen">
+      <!-- Left: Camera Preview -->
+      <div class="active-camera-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h3 style="font-family: var(--font-display); font-size: 20px; color: var(--primary);">
+            📷 กล้องสแกนวัตถุภายในตู้ (AI Vision Chamber)
+          </h3>
+          <span id="ai-status-pill" style="font-size: 13px; background: var(--bg-card); padding: 4px 12px; border-radius: 12px;">
+            กำลังประมวลผล...
+          </span>
+        </div>
+
+        <div class="camera-viewport">
+          <img id="active-camera-stream" src="" alt="Camera Stream">
+        </div>
+      </div>
+
+      <!-- Right: User Stats & Countdown -->
+      <div class="active-dashboard-panel">
+        <div class="user-banner-card">
+          <div>
+            <div style="font-size: 13px; color: var(--text-muted);">ผู้ใช้งานปัจจุบัน</div>
+            <div class="user-greeting" id="active-user-name">คุณกำลังใช้งาน</div>
+          </div>
+          <div class="score-total-display">
+            ⭐ <span id="active-user-score">0</span>
+          </div>
+        </div>
+
+        <!-- Timeout Countdown Card -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px 24px;">
+          <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 15px;">
+            <span>⏳ เวลาที่เหลือในเซสชัน:</span>
+            <strong id="active-timer-text" style="color: var(--accent-amber);">60 วินาที</strong>
+          </div>
+          <div class="timeout-bar-container">
+            <div id="active-timer-bar" class="timeout-bar-fill"></div>
+          </div>
+        </div>
+
+        <!-- Stats Boxes -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 4px;">🧴</div>
+            <div style="font-size: 14px; color: var(--text-muted);">ขวดพลาสติก (+1)</div>
+            <div id="active-count-plastic" style="font-family: var(--font-mono); font-size: 30px; font-weight: 800; color: var(--primary);">0</div>
+          </div>
+
+          <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 4px;">🥫</div>
+            <div style="font-size: 14px; color: var(--text-muted);">กระป๋องโลหะ (+2)</div>
+            <div id="active-count-metal" style="font-family: var(--font-mono); font-size: 30px; font-weight: 800; color: var(--accent-amber);">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5-Second Cartoon Feedback Modal -->
+      <div id="cartoon-modal">
+        <div class="cartoon-char">🎉🤖✨</div>
+        <div id="cartoon-title" class="cartoon-title">+1 คะแนน!</div>
+        <div id="cartoon-sub" class="cartoon-sub">คัดแยกขวดพลาสติกเรียบร้อย</div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let activeKeyId = null;
+    let ws = null;
+
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0];
+      const d = String(now.getDate()).padStart(2, '0');
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const y = String(now.getFullYear()).slice(-2);
+      document.getElementById('clock-display').innerText = timeStr;
+      document.getElementById('date-display').innerText = `${d}/${m}/${y}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Poll session & network status
+    async function pollStatus() {
+      try {
+        const res = await fetch('/api/auth/session/status');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Update Header
+        if (data.kiosk_ip) document.getElementById('kiosk-ip').innerText = data.kiosk_ip;
+        if (data.wifi_ssid) document.getElementById('wifi-ssid').innerText = data.wifi_ssid;
+
+        // Update Bin Indicators
+        if (data.bin_status) {
+          const pFull = data.bin_status.plastic.is_full;
+          const mFull = data.bin_status.metal.is_full;
+
+          document.getElementById('dot-plastic').className = 'status-dot ' + (pFull ? 'full' : '');
+          document.getElementById('text-plastic-status').innerText = pFull ? 'ถังเต็ม (กรุณารอเจ้าหน้าที่)' : 'พร้อมรับขยะ';
+          document.getElementById('text-plastic-status').style.color = pFull ? 'var(--danger)' : 'var(--primary)';
+
+          document.getElementById('dot-metal').className = 'status-dot ' + (mFull ? 'full' : '');
+          document.getElementById('text-metal-status').innerText = mFull ? 'ถังเต็ม (กรุณารอเจ้าหน้าที่)' : 'พร้อมรับขยะ';
+          document.getElementById('text-metal-status').style.color = mFull ? 'var(--danger)' : 'var(--primary)';
+        }
+
+        // Screen transition
+        if (data.has_active_session) {
+          if (activeKeyId !== data.active_key_id) {
+            activeKeyId = data.active_key_id;
+            enterActiveSession(data);
+          }
+          // Update Countdown
+          const rem = data.time_remaining_sec;
+          document.getElementById('active-timer-text').innerText = `${rem} วินาที`;
+          document.getElementById('active-timer-bar').style.width = `${(rem / 60) * 100}%`;
+        } else {
+          if (activeKeyId !== null) {
+            activeKeyId = null;
+            exitActiveSession();
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    setInterval(pollStatus, 1500);
+    pollStatus();
+
+    function enterActiveSession(data) {
+      document.getElementById('view-standby').classList.remove('active');
+      document.getElementById('view-active').classList.add('active');
+      document.getElementById('active-user-name').innerText = data.active_username || 'สมาชิก';
+
+      // Connect WebSocket for live camera and scoring events
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${proto}//${window.location.host}/ws/recycle/${activeKeyId}`;
+      ws = new WebSocket(wsUrl);
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'SESSION_STARTED') {
+            document.getElementById('active-user-score').innerText = msg.current_score;
+          } else if (msg.type === 'PREVIEW_FRAME') {
+            if (msg.image) {
+              document.getElementById('active-camera-stream').src = 'data:image/jpeg;base64,' + msg.image;
+            }
+            if (msg.candidate_class) {
+              document.getElementById('ai-status-pill').innerText = `ตรวจจับ: ${msg.candidate_class.toUpperCase()} (${Math.round(msg.progress * 100)}%)`;
+            }
+          } else if (msg.type === 'ITEM_DETECTED') {
+            document.getElementById('active-count-plastic').innerText = msg.session_plastic;
+            document.getElementById('active-count-metal').innerText = msg.session_metal;
+            document.getElementById('active-user-score').innerText = msg.user_score;
+            showCartoonModal(msg.item_type, msg.points_awarded);
+          } else if (msg.type === 'BIN_FULL_WARNING') {
+            alert(msg.message);
+          }
+        } catch (e) {}
+      };
+    }
+
+    function exitActiveSession() {
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+      document.getElementById('view-active').classList.remove('active');
+      document.getElementById('view-standby').classList.add('active');
+    }
+
+    function showCartoonModal(itemType, points) {
+      const modal = document.getElementById('cartoon-modal');
+      const title = document.getElementById('cartoon-title');
+      const sub = document.getElementById('cartoon-sub');
+
+      title.innerText = `+${points} คะแนน!`;
+      sub.innerText = itemType === 'plastic' ? 'คัดแยกขวดพลาสติกเรียบร้อย' : 'คัดแยกกระป๋องโลหะเรียบร้อย';
+      modal.style.display = 'flex';
+      setTimeout(() => { modal.style.display = 'none'; }, 5000);
+    }
+  </script>
+</body>
+</html>

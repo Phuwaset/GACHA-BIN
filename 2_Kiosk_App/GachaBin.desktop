@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=GACHA-BIN Kiosk
+Comment=Smart Vision Recycling Kiosk System
+Exec=/bin/bash -c 'DIR="$(dirname "%k")"; if [ -f "$DIR/run_kiosk.sh" ]; then bash "$DIR/run_kiosk.sh"; elif [ -f "$HOME/run_kiosk.sh" ]; then bash "$HOME/run_kiosk.sh"; else find "$HOME" -maxdepth 4 -name "run_kiosk.sh" -exec bash {} \; ; fi'
+Path=
+Icon=media-record
+Terminal=false
+StartupNotify=true
+Categories=Utility;Application;

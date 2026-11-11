@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GACHA-BIN Mobile Remote</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --accent: #8b5cf6;
+      --amber: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Prompt', 'Kanit', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Kanit';
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      font-family: 'Kanit';
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    label {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    input {
+      height: 52px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 0 16px;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      width: 100%;
+      height: 54px;
+      border-radius: 16px;
+      font-family: 'Kanit';
+      font-size: 17px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ticket-card {
+      background: var(--bg);
+      border: 1.5px dashed var(--accent);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ticket-code {
+      font-family: 'Kanit';
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+    .status-pending { background: rgba(16, 185, 129, 0.2); color: var(--primary); }
+    .status-waiting { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
+    .status-claimed { background: rgba(148, 163, 184, 0.2); color: var(--text-muted); }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">♻️ GACHA-BIN</div>
+      <div id="user-pill" style="display: none; font-size: 14px; color: var(--text-muted);">
+        👤 <span id="header-user"></span>
+      </div>
+    </header>
+
+    <!-- 1. LOGIN VIEW -->
+    <div id="view-login" class="card">
+      <h2>เข้าสู่ระบบเพื่อสะสมแต้ม</h2>
+      <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px;">
+        กรอกชื่อและเบอร์โทรศัพท์เพื่อเริ่มเปิดเซสชันหน้าตู้
+      </p>
+
+      <div class="input-group">
+        <label>ชื่อผู้ใช้งาน (Username)</label>
+        <input type="text" id="input-username" placeholder="เช่น กานต์">
+      </div>
+
+      <div class="input-group">
+        <label>เบอร์โทรศัพท์ (Phone Number)</label>
+        <input type="tel" id="input-phone" placeholder="08xxxxxxxx">
+      </div>
+
+      <div class="input-group" id="group-pin" style="display: none;">
+        <label>รหัส PIN (สำหรับ Super Admin)</label>
+        <input type="password" id="input-pin" placeholder="PIN 6 หลัก (123456)">
+      </div>
+
+      <button class="btn btn-primary" onclick="submitLogin()">เปิดเซสชันหน้าตู้ ➔</button>
+      <p id="login-error" style="color: var(--danger); font-size: 13.5px; margin-top: 10px;"></p>
+    </div>
+
+    <!-- 2. QUEUE VIEW -->
+    <div id="view-queue" class="card" style="display: none; text-align: center;">
+      <div style="font-size: 54px; margin-bottom: 12px;">⏳</div>
+      <h2>กำลังมีผู้ใช้งานอยู่</h2>
+      <p id="queue-msg" style="color: var(--text-muted); font-size: 14.5px; margin-bottom: 20px;">
+        กรุณารอสักครู่ ระบบจะเปิดหน้าใช้งานให้คุณโดยอัตโนมัติ...
+      </p>
+      <button class="btn btn-secondary" onclick="logout()">ยกเลิกคิว</button>
+    </div>
+
+    <!-- 3. ACTIVE DASHBOARD VIEW -->
+    <div id="view-dashboard" style="display: none; display: flex; flex-direction: column; gap: 16px;">
+      <!-- Score Banner -->
+      <div class="card" style="border: 2px solid var(--primary); text-align: center;">
+        <div style="font-size: 13.5px; color: var(--text-muted);">คะแนนสะสมคงเหลือ</div>
+        <div style="font-family: 'Kanit'; font-size: 44px; font-weight: 800; color: var(--primary);">
+          ⭐ <span id="dash-score">0</span>
+        </div>
+        <p style="font-size: 12.5px; color: var(--text-muted);">
+          ขวดพลาสติก = +1 แต้ม | กระป๋องโลหะ = +2 แต้ม
+        </p>
+      </div>
+
+      <!-- Gacha Action Button -->
+      <button id="btn-spin" class="btn btn-accent" onclick="spinGacha()">
+        🎁 หมุนสุ่มกาชาปอง (ใช้ 20 แต้ม)
+      </button>
+
+      <!-- Admin Shortcut Button (Only if Super Admin) -->
+      <button id="btn-admin-panel" class="btn btn-secondary" style="display: none;" onclick="window.location.href='/admin'">
+        ⚙️ จัดการระบบ (Admin Portal)
+      </button>
+
+      <!-- My Tickets Section -->
+      <div class="card">
+        <h3 style="font-family: 'Kanit'; font-size: 18px; margin-bottom: 14px;">🎫 ตั๋วรับของรางวัลของคุณ</h3>
+        <div id="tickets-list">
+          <p style="color: var(--text-muted); font-size: 13.5px;">ยังไม่มีตั๋วของรางวัล</p>
+        </div>
+      </div>
+
+      <button class="btn btn-secondary" onclick="logout()">เสร็จสิ้น / ออกจากระบบ</button>
+    </div>
+  </div>
+
+  <!-- Result Modal -->
+  <div id="result-modal" class="modal">
+    <div class="card" style="width: 100%; max-width: 360px; text-align: center;">
+      <div id="modal-icon" style="font-size: 64px; margin-bottom: 10px;">🎉</div>
+      <h2 id="modal-title">ยินดีด้วย!</h2>
+      <p id="modal-msg" style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;"></p>
+      <div id="modal-code-wrap" style="background: var(--bg); border: 2px dashed var(--primary); border-radius: 12px; padding: 12px; margin-bottom: 18px;">
+        <div style="font-size: 11px; color: var(--text-muted);">รหัสสำหรับยื่นรับรางวัล</div>
+        <div id="modal-code" style="font-family: 'Kanit'; font-size: 26px; font-weight: 800; color: var(--primary);"></div>
+      </div>
+      <button class="btn btn-primary" onclick="closeModal()">ตกลง</button>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('gacha_token') || '';
+    let userData = null;
+    let pollInterval = null;
+
+    async function submitLogin() {
+      const username = document.getElementById('input-username').value.trim();
+      const phone = document.getElementById('input-phone').value.trim();
+      const pin = document.getElementById('input-pin').value.trim();
+      const err = document.getElementById('login-error');
+      err.innerText = '';
+
+      if (!username || !phone) {
+        err.innerText = 'กรุณากรอกชื่อและเบอร์โทรศัพท์';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, phone, pin: pin || null })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Login error');
+
+        if (data.requires_pin) {
+          document.getElementById('group-pin').style.display = 'flex';
+          err.innerText = data.message;
+          return;
+        }
+
+        token = data.token;
+        localStorage.setItem('gacha_token', token);
+        userData = data;
+
+        handleSessionState(data);
+      } catch (e) {
+        err.innerText = e.message;
+      }
+    }
+
+    function handleSessionState(data) {
+      document.getElementById('view-login').style.display = 'none';
+      document.getElementById('user-pill').style.display = 'block';
+      document.getElementById('header-user').innerText = data.username;
+
+      if (data.role === 'superadmin') {
+        document.getElementById('btn-admin-panel').style.display = 'flex';
+      }
+
+      if (data.is_active_session) {
+        document.getElementById('view-queue').style.display = 'none';
+        document.getElementById('view-dashboard').style.display = 'flex';
+        updateDashboard(data);
+        loadTickets();
+      } else {
+        document.getElementById('view-dashboard').style.display = 'none';
+        document.getElementById('view-queue').style.display = 'block';
+        document.getElementById('queue-msg').innerText = data.message;
+        startPollingQueue();
+      }
+    }
+
+    function startPollingQueue() {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch('/api/auth/session/status');
+          const data = await res.json();
+          if (data.active_key_id === userData.key_id) {
+            clearInterval(pollInterval);
+            userData.is_active_session = true;
+            handleSessionState(userData);
+          }
+        } catch (e) {}
+      }, 2000);
+    }
+
+    function updateDashboard(data) {
+      document.getElementById('dash-score').innerText = data.score;
+      document.getElementById('btn-spin').disabled = data.score < 20;
+    }
+
+    async function spinGacha() {
+      const btn = document.getElementById('btn-spin');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/gacha/spin', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Spin failed');
+
+        document.getElementById('dash-score').innerText = data.remaining_score;
+        document.getElementById('btn-spin').disabled = data.remaining_score < 20;
+
+        // Show result modal
+        const modal = document.getElementById('result-modal');
+        if (data.status === 'won') {
+          document.getElementById('modal-icon').innerText = '🎉';
+          document.getElementById('modal-title').innerText = 'ได้รับ: ' + data.reward_name;
+          document.getElementById('modal-msg').innerText = data.message;
+          document.getElementById('modal-code').innerText = data.claim_code;
+        } else {
+          document.getElementById('modal-icon').innerText = '🤖🙏';
+          document.getElementById('modal-title').innerText = 'ของรางวัลหมดชั่วคราว';
+          document.getElementById('modal-msg').innerText = data.message;
+          document.getElementById('modal-code').innerText = data.claim_code;
+        }
+        modal.style.display = 'flex';
+        loadTickets();
+      } catch (e) {
+        alert(e.message);
+        btn.disabled = false;
+      }
+    }
+
+    async function loadTickets() {
+      try {
+        const res = await fetch('/api/gacha/my-tickets', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) return;
+        const tickets = await res.json();
+        const list = document.getElementById('tickets-list');
+        if (tickets.length === 0) {
+          list.innerHTML = '<p style="color: var(--text-muted); font-size: 13.5px;">ยังไม่มีตั๋วของรางวัล</p>';
+          return;
+        }
+        list.innerHTML = tickets.map(t => `
+          <div class="ticket-card">
+            <div>
+              <div class="ticket-code">${t.claim_code}</div>
+              <div style="font-size: 13.5px; font-weight: 600;">${t.reward_name}</div>
+              <div style="font-size: 11px; color: var(--text-muted);">${t.tier.toUpperCase()}</div>
+            </div>
+            <div>
+              <span class="status-badge ${t.claim_status === 'claimed' ? 'status-claimed' : (t.claim_status === 'pending' ? 'status-pending' : 'status-waiting')}">
+                ${t.claim_status === 'claimed' ? 'รับแล้ว' : (t.claim_status === 'pending' ? 'พร้อมรับของ' : 'รอเติมสต็อก')}
+              </span>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    function closeModal() {
+      document.getElementById('result-modal').style.display = 'none';
+    }
+
+    async function logout() {
+      if (pollInterval) clearInterval(pollInterval);
+      try {
+        await fetch('/api/auth/session/logout', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+      } catch (e) {}
+      localStorage.removeItem('gacha_token');
+      window.location.reload();
+    }
+  </script>
+</body>
+</html>

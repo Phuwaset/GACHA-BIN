@@ -1,0 +1,6 @@
+path: ./dataset
+train: images/train
+val: images/val
+names:            # MUST match classes.txt order (Label Studio alphabetizes!)
+  0: metal
+  1: plastic

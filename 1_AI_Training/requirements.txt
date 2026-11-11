@@ -1,0 +1,23 @@
+# ===== GACHA-BIN dependencies =====
+# Environment ที่ใช้จริง: Windows 11 + Python 3.13 + NVIDIA RTX 4050 (CUDA 12.4)
+# ติดตั้งทั้งหมด:   pip install -r requirements.txt
+# (ถ้า pip ใช้ uv: uv pip install -r requirements.txt --python <path>
+#                  \venv\Scripts\python.exe  )
+
+# --- PyTorch CUDA build (จำเป็นสำหรับเทรน/รันบน GPU) ---
+torch==2.6.0+cu124
+torchvision==0.21.0+cu124
+--extra-index-url https://download.pytorch.org/whl/cu124
+
+# --- Ultralytics (YOLO11) ---
+ultralytics==8.4.175
+
+# --- กล้อง/ภาพ ---
+opencv-python==5.0.0.93
+
+# --- อื่น ๆ ---
+numpy==2.5.2
+
+# === บน Raspberry Pi (CPU only) ===
+# ติดตั้งแทนที่:  pip install ultralytics opencv-python-headless
+# โดยไม่ต้องใช้ torch CUDA build ข้างบน (torch CPU สำหรับ aarch64 ลงอัตโนมัติ)

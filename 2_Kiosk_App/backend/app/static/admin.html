@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GACHA-BIN Super Admin Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #10b981;
+      --bg: #090d16;
+      --surface: #111827;
+      --card: #1f2937;
+      --border: #374151;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent: #8b5cf6;
+      --amber: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', 'Kanit', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+    .brand { font-family: 'Kanit'; font-size: 22px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    
+    .nav-tabs { display: flex; gap: 8px; background: var(--surface); padding: 8px 32px; border-bottom: 1px solid var(--border); }
+    .tab-btn { background: none; border: none; color: var(--text-muted); font-family: 'Kanit'; font-size: 15px; font-weight: 600; padding: 10px 20px; border-radius: 12px; cursor: pointer; }
+    .tab-btn.active { background: var(--card); color: var(--primary); border: 1px solid var(--border); }
+
+    main { flex: 1; padding: 28px 32px; max-width: 1300px; width: 100%; margin: 0 auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin-bottom: 24px; }
+    h2 { font-family: 'Kanit'; font-size: 22px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { font-family: 'Kanit'; font-size: 14px; color: var(--text-muted); }
+    td { font-size: 14.5px; }
+
+    .btn { padding: 8px 16px; border-radius: 10px; font-family: 'Kanit'; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+    .btn:active { transform: scale(0.97); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .input-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .input-row label { font-size: 13px; color: var(--text-muted); }
+    .input-row input { height: 44px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0 14px; color: #fff; font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">⚙️ GACHA-BIN — Super Admin Portal</div>
+    <div style="font-size: 14px; color: var(--text-muted);">
+      บัญชี: <strong id="admin-user" style="color: var(--primary);">phuwaset</strong> (Super Admin)
+      <button class="btn btn-secondary" style="margin-left: 12px;" onclick="logout()">ออกจากระบบ</button>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('inventory')">📦 จัดการคลังของรางวัล</button>
+    <button class="tab-btn" onclick="switchTab('claims')">🎫 ตรวจสอบตั๋ว & ส่งมอบของ</button>
+    <button class="tab-btn" onclick="switchTab('hardware')">🔧 ตั้งค่า GPIO / Servo / เซนเซอร์</button>
+    <button class="tab-btn" onclick="switchTab('users')">👥 สมาชิก & แต้ม</button>
+  </nav>
+
+  <main>
+    <!-- TAB 1: INVENTORY CRUD -->
+    <div id="tab-inventory" class="tab-content active">
+      <div class="card">
+        <h2>
+          <span>คลังของรางวัลกาชาปอง (3 Tiers)</span>
+          <button class="btn btn-primary" onclick="showAddRewardModal()">+ เพิ่มของรางวัลใหม่</button>
+        </h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>ชื่อของรางวัล</th>
+              <th>ระดับ (Tier)</th>
+              <th>หมวดหมู่</th>
+              <th>สต็อกคงเหลือ</th>
+              <th>จัดการสต็อก</th>
+              <th>การกระทำ</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-table-body">
+            <tr><td colspan="7">กำลังโหลดข้อมูล...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: CLAIMS VERIFICATION -->
+    <div id="tab-claims" class="tab-content">
+      <div class="card">
+        <h2>รายการตั๋วรับรางวัลของผู้ใช้งาน</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>รหัสตั๋ว (Code)</th>
+              <th>ชื่อของรางวัล</th>
+              <th>ระดับ</th>
+              <th>ผู้ใช้งาน</th>
+              <th>เบอร์โทร</th>
+              <th>สถานะ</th>
+              <th>การกระทำ</th>
+            </tr>
+          </thead>
+          <tbody id="claims-table-body">
+            <tr><td colspan="7">กำลังโหลดข้อมูล...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: HARDWARE & GPIO TUNER -->
+    <div id="tab-hardware" class="tab-content">
+      <div class="grid-2">
+        <!-- Servo 1 (Diverter) -->
+        <div class="card">
+          <h2>Servo 1: รางนำร่อง (Direction Diverter)</h2>
+          <div class="input-row">
+            <label>GPIO PWM Pin (BCM)</label>
+            <input type="number" id="s1-pin" value="12">
+          </div>
+          <div class="input-row">
+            <label>องศากึ่งกลาง Neutral (Default: 90°)</label>
+            <input type="number" id="s1-center" value="90">
+          </div>
+          <div class="input-row">
+            <label>องศาเอียงซ้าย Plastic (Default: 45°)</label>
+            <input type="number" id="s1-left" value="45">
+          </div>
+          <div class="input-row">
+            <label>องศาเอียงขวา Metal (Default: 135°)</label>
+            <input type="number" id="s1-right" value="135">
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button class="btn btn-secondary" onclick="testServo('s1-pin', 's1-center')">ทดสอบ 90°</button>
+            <button class="btn btn-secondary" onclick="testServo('s1-pin', 's1-left')">ทดสอบ 45° (Plastic)</button>
+            <button class="btn btn-secondary" onclick="testServo('s1-pin', 's1-right')">ทดสอบ 135° (Metal)</button>
+          </div>
+        </div>
+
+        <!-- Servo 2 (Pusher) -->
+        <div class="card">
+          <h2>Servo 2: ก้านปัดขวด (Bottle Pusher Arm)</h2>
+          <div class="input-row">
+            <label>GPIO PWM Pin (BCM)</label>
+            <input type="number" id="s2-pin" value="13">
+          </div>
+          <div class="input-row">
+            <label>องศาเริ่มต้น Home / Retract (Default: 90°)</label>
+            <input type="number" id="s2-center" value="90">
+          </div>
+          <div class="input-row">
+            <label>องศาปัดขวด Sweep / Push (Default: 150°)</label>
+            <input type="number" id="s2-push" value="150">
+          </div>
+          <div class="input-row">
+            <label>ระยะเวลาทำงาน (ms)</label>
+            <input type="number" id="s2-dur" value="1200">
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button class="btn btn-secondary" onclick="testServo('s2-pin', 's2-push')">ทดสอบปัดขวด</button>
+            <button class="btn btn-secondary" onclick="testServo('s2-pin', 's2-center')">ดึงกลับ Home</button>
+          </div>
+        </div>
+
+        <!-- Ultrasonic Sensors -->
+        <div class="card">
+          <h2>เซนเซอร์วัดระดับขยะ Ultrasonic (HC-SR04)</h2>
+          <div class="grid-2">
+            <div>
+              <h4 style="color: var(--primary); margin-bottom: 8px;">ถังพลาสติก (Plastic)</h4>
+              <div class="input-row"><label>Trig Pin</label><input type="number" id="us-p-trig" value="23"></div>
+              <div class="input-row"><label>Echo Pin (0 = 1-Pin)</label><input type="number" id="us-p-echo" value="24"></div>
+              <div class="input-row"><label>เกณฑ์ถังเต็ม (cm)</label><input type="number" id="us-p-thresh" value="30"></div>
+              <button class="btn btn-secondary" onclick="testUltrasonic('us-p-trig', 'us-p-echo')">อ่านระยะสด</button>
+            </div>
+            <div>
+              <h4 style="color: var(--amber); margin-bottom: 8px;">ถังกระป๋อง (Metal)</h4>
+              <div class="input-row"><label>Trig Pin</label><input type="number" id="us-m-trig" value="5"></div>
+              <div class="input-row"><label>Echo Pin (0 = 1-Pin)</label><input type="number" id="us-m-echo" value="6"></div>
+              <div class="input-row"><label>เกณฑ์ถังเต็ม (cm)</label><input type="number" id="us-m-thresh" value="30"></div>
+              <button class="btn btn-secondary" onclick="testUltrasonic('us-m-trig', 'us-m-echo')">อ่านระยะสด</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Times -->
+        <div class="card">
+          <h2>การหน่วงเวลาและเวลาระบบ (System Timers)</h2>
+          <div class="input-row">
+            <label>เวลาแสดงการ์ตูนหลังคัดแยกเสร็จ (วินาที)</label>
+            <input type="number" id="sys-hold" value="5">
+          </div>
+          <div class="input-row">
+            <label>เวลาตัดเซสชันอัตโนมัติเมื่อไม่เคลื่อนไหว (วินาที)</label>
+            <input type="number" id="sys-timeout" value="60">
+          </div>
+          <button class="btn btn-primary" style="margin-top: 14px; width: 100%;" onclick="saveHardwareSettings()">
+            💾 บันทึกการตั้งค่าฮาร์ดแวร์ทั้งหมด
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: USERS -->
+    <div id="tab-users" class="tab-content">
+      <div class="card">
+        <h2>รายชื่อสมาชิกและคะแนนสะสม</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Key ID</th>
+              <th>ชื่อผู้ใช้งาน</th>
+              <th>เบอร์โทร</th>
+              <th>คะแนนคงเหลือ</th>
+              <th>คะแนนรวม</th>
+              <th>สิทธิ์</th>
+              <th>จัดการแต้ม</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body">
+            <tr><td colspan="7">กำลังโหลดข้อมูล...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let token = localStorage.getItem('gacha_token') || '';
+
+    function checkAuth() {
+      if (!token) {
+        window.location.href = '/m';
+      }
+    }
+    checkAuth();
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+
+      if (tabId === 'inventory') loadInventory();
+      if (tabId === 'claims') loadClaims();
+      if (tabId === 'hardware') loadSettings();
+      if (tabId === 'users') loadUsers();
+    }
+
+    async function loadInventory() {
+      try {
+        const res = await fetch('/api/admin/rewards', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!res.ok) { checkAuth(); return; }
+        const data = await res.json();
+        const tbody = document.getElementById('inventory-table-body');
+        tbody.innerHTML = data.map(r => `
+          <tr>
+            <td>${r.id}</td>
+            <td><strong>${r.name}</strong></td>
+            <td><span style="font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--card);">${r.tier.toUpperCase()}</span></td>
+            <td>${r.category}</td>
+            <td><strong style="color: ${r.stock > 0 ? 'var(--primary)' : 'var(--danger)'};">${r.stock} ชิ้น</strong></td>
+            <td>
+              <button class="btn btn-secondary" onclick="adjustStock(${r.id}, ${r.stock + 1})">+1</button>
+              <button class="btn btn-secondary" onclick="adjustStock(${r.id}, ${r.stock + 5})">+5</button>
+            </td>
+            <td>
+              <button class="btn btn-danger" onclick="deleteReward(${r.id})">ลบ</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function adjustStock(id, newStock) {
+      await fetch('/api/admin/rewards/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ stock: newStock })
+      });
+      loadInventory();
+    }
+
+    async function deleteReward(id) {
+      if (!confirm('ยืนยันลบของรางวัลนี้ออกจากตู้?')) return;
+      await fetch('/api/admin/rewards/' + id, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      loadInventory();
+    }
+
+    async function loadClaims() {
+      try {
+        const res = await fetch('/api/admin/claims', { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await res.json();
+        const tbody = document.getElementById('claims-table-body');
+        tbody.innerHTML = data.map(c => `
+          <tr>
+            <td><strong style="font-family: 'JetBrains Mono'; color: var(--primary);">${c.claim_code}</strong></td>
+            <td>${c.reward_name}</td>
+            <td>${c.tier.toUpperCase()}</td>
+            <td>${c.user_name}</td>
+            <td>${c.user_phone}</td>
+            <td>${c.claim_status === 'claimed' ? '✅ รับของแล้ว' : (c.claim_status === 'pending' ? '🟡 พร้อมรับของ' : '⏳ รอเติมสต็อก')}</td>
+            <td>
+              ${c.claim_status !== 'claimed' ? `<button class="btn btn-primary" onclick="confirmHandover('${c.claim_code}')">กดยืนยันจ่ายของ</button>` : '-'}
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function confirmHandover(code) {
+      await fetch(`/api/admin/claims/${code}/handover`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      loadClaims();
+    }
+
+    async function testServo(pinId, angleId) {
+      const pin = parseInt(document.getElementById(pinId).value);
+      const angle = parseInt(document.getElementById(angleId).value);
+      const res = await fetch('/api/admin/test/servo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ pin, angle })
+      });
+      const data = await res.json();
+      alert(`สั่งหมุนเซอร์โวขา ${data.pin} ไปที่ ${data.angle}° เรียบร้อย`);
+    }
+
+    async function testUltrasonic(trigId, echoId) {
+      const trig_pin = parseInt(document.getElementById(trigId).value);
+      const echo_pin = parseInt(document.getElementById(echoId).value);
+      const res = await fetch('/api/admin/test/ultrasonic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ trig_pin, echo_pin })
+      });
+      const data = await res.json();
+      alert(`วัดระยะทางได้: ${data.distance_cm} cm`);
+    }
+
+    function logout() {
+      localStorage.removeItem('gacha_token');
+      window.location.href = '/m';
+    }
+
+    loadInventory();
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+# Python virtual environments
+.venv/
+venv/
+ENV/
+env/
+*.venv
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases & local state
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+gachabin.log
+
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node / JS artifacts (legacy cleanup)
+node_modules/
+dist/
+build/
+
+# Training runs / checkpoints (Ultralytics)
+runs/
+*.cache
+*.onnx
+*.engine
