@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
       --primary: #10b981;
@@ -296,7 +298,12 @@
       err.innerText = '';
 
       if (!username || !phone) {
-        err.innerText = 'กรุณากรอกชื่อและเบอร์โทรศัพท์';
+        Swal.fire({
+          icon: 'warning',
+          title: 'ข้อมูลไม่ครบถ้วน',
+          text: 'กรุณากรอกชื่อและเบอร์โทรศัพท์',
+          confirmButtonColor: '#10b981'
+        });
         return;
       }
 
@@ -436,6 +443,18 @@
     }
 
     async function logout() {
+      const confirm = await Swal.fire({
+        title: 'ออกจากเซสชัน?',
+        text: 'ต้องการสิ้นสุดรอบการใช้งานหน้าตู้ GACHA-BIN ใช่หรือไม่',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#334155',
+        confirmButtonText: 'ออกจากระบบ',
+        cancelButtonText: 'ยกเลิก'
+      });
+      if (!confirm.isConfirmed) return;
+
       if (pollInterval) clearInterval(pollInterval);
       try {
         await fetch('/api/auth/session/logout', {

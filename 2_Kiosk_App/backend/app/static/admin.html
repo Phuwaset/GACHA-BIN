@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
       --primary: #10b981;
@@ -341,7 +343,12 @@
       const pin = document.getElementById('admin-login-pin').value.trim();
 
       if (!username || !phone || !pin) {
-        err.innerText = 'กรุณากรอก Username, เบอร์โทรศัพท์ และรหัส PIN ให้ครบถ้วน';
+        Swal.fire({
+          icon: 'warning',
+          title: 'ข้อมูลไม่ครบถ้วน',
+          text: 'กรุณากรอก Username, เบอร์โทรศัพท์ และรหัส PIN ให้ครบถ้วน',
+          confirmButtonColor: '#10b981'
+        });
         return;
       }
 
@@ -355,7 +362,7 @@
         if (!res.ok) throw new Error(data.detail || 'Login failed');
 
         if (data.role !== 'superadmin') {
-          throw new Error('บัญชีนี้ไม่ใช่ Super Admin');
+          throw new Error('บัญชีนี้ไม่มีสิทธิ์ระดับ Super Admin');
         }
 
         token = data.token;
@@ -364,9 +371,23 @@
         document.getElementById('admin-user').innerText = data.username;
         document.getElementById('admin-login-pin').value = '';
         document.getElementById('modal-admin-login').style.display = 'none';
+
+        Swal.fire({
+          icon: 'success',
+          title: 'เข้าสู่ระบบสำเร็จ!',
+          text: `ยินดีต้อนรับ Super Admin (${data.username})`,
+          timer: 1500,
+          showConfirmButton: false
+        });
+
         loadInventory();
       } catch (e) {
-        err.innerText = e.message;
+        Swal.fire({
+          icon: 'error',
+          title: 'เข้าสู่ระบบไม่สำเร็จ',
+          text: e.message,
+          confirmButtonColor: '#ef4444'
+        });
       }
     }
 
@@ -417,11 +438,23 @@
     }
 
     async function deleteReward(id) {
-      if (!confirm('ยืนยันลบของรางวัลนี้ออกจากตู้?')) return;
+      const res = await Swal.fire({
+        title: 'ยืนยันลบของรางวัล?',
+        text: 'รางวัลนี้จะถูกนำออกจากระบบตู้ทันที',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#374151',
+        confirmButtonText: 'ใช่, ลบเลย',
+        cancelButtonText: 'ยกเลิก'
+      });
+      if (!res.isConfirmed) return;
+
       await fetch('/api/admin/rewards/' + id, {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + token }
       });
+      Swal.fire({ icon: 'success', title: 'ลบของรางวัลสำเร็จ', timer: 1200, showConfirmButton: false });
       loadInventory();
     }
 
@@ -439,7 +472,15 @@
       const category = document.getElementById('new-reward-cat').value.trim();
       const stock = parseInt(document.getElementById('new-reward-stock').value) || 0;
 
-      if (!name) { alert('กรุณาระบุชื่อของรางวัล'); return; }
+      if (!name) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ข้อมูลไม่ครบถ้วน',
+          text: 'กรุณาระบุชื่อของรางวัล',
+          confirmButtonColor: '#10b981'
+        });
+        return;
+      }
 
       const res = await fetch('/api/admin/rewards', {
         method: 'POST',
@@ -448,10 +489,16 @@
       });
       if (res.ok) {
         closeAddRewardModal();
+        Swal.fire({ icon: 'success', title: 'เพิ่มของรางวัลสำเร็จ!', timer: 1200, showConfirmButton: false });
         loadInventory();
       } else {
         const d = await res.json();
-        alert('เกิดข้อผิดพลาด: ' + (d.detail || 'บันทึกไม่สำเร็จ'));
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: d.detail || 'บันทึกไม่สำเร็จ',
+          confirmButtonColor: '#ef4444'
+        });
       }
     }
 
@@ -482,12 +529,28 @@
     }
 
     async function confirmHandover(code) {
-      if (!confirm(`ยืนยันการจ่ายของรางวัลสำหรับตั๋ว ${code}?`)) return;
+      const confirm = await Swal.fire({
+        title: 'ยืนยันการจ่ายของรางวัล?',
+        html: `ต้องการบันทึกส่งมอบสำหรับรหัสตั๋ว <b style="color: var(--primary);">${code}</b> หรือไม่?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#374151',
+        confirmButtonText: 'ยืนยันจ่ายของ',
+        cancelButtonText: 'ยกเลิก'
+      });
+      if (!confirm.isConfirmed) return;
+
       const res = await fetch(`/api/admin/claims/${code}/handover`, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      if (res.ok) loadClaims();
+      if (res.ok) {
+        Swal.fire({ icon: 'success', title: 'ส่งมอบสำเร็จ', timer: 1200, showConfirmButton: false });
+        loadClaims();
+      } else {
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาดในการบันทึกส่งมอบ', confirmButtonColor: '#ef4444' });
+      }
     }
 
     async function loadSettings() {
@@ -555,9 +618,19 @@
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        alert('บันทึกการตั้งค่าฮาร์ดแวร์สำเร็จเรียบร้อย!');
+        Swal.fire({
+          icon: 'success',
+          title: 'บันทึกสำเร็จ!',
+          text: 'บันทึกการตั้งค่าฮาร์ดแวร์และเซนเซอร์เรียบร้อยแล้ว',
+          confirmButtonColor: '#10b981'
+        });
       } else {
-        alert('เกิดข้อผิดพลาดในการบันทึกค่า');
+        Swal.fire({
+          icon: 'error',
+          title: 'บันทึกไม่สำเร็จ',
+          text: 'เกิดข้อผิดพลาดในการบันทึกค่าลงฐานข้อมูล',
+          confirmButtonColor: '#ef4444'
+        });
       }
     }
 
@@ -583,17 +656,34 @@
     }
 
     async function editUserScore(keyId, currentScore) {
-      const newScore = prompt(`ระบุแต้มใหม่สำหรับ Key ID: ${keyId}`, currentScore);
-      if (newScore === null) return;
-      const scoreInt = parseInt(newScore);
-      if (isNaN(scoreInt) || scoreInt < 0) { alert('กรุณากรอกตัวเลขที่ถูกต้อง'); return; }
+      const { value: newScore } = await Swal.fire({
+        title: 'แก้ไขคะแนนผู้ใช้งาน',
+        html: `ระบุคะแนนสะสมใหม่สำหรับ <b>${keyId}</b>`,
+        input: 'number',
+        inputValue: currentScore,
+        inputAttributes: { min: 0, step: 1 },
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#374151',
+        confirmButtonText: 'บันทึกแต้มใหม่',
+        cancelButtonText: 'ยกเลิก',
+        inputValidator: (val) => {
+          if (val === '' || isNaN(parseInt(val)) || parseInt(val) < 0) {
+            return 'กรุณากรอกคะแนนเป็นตัวเลขจำนวนเต็มบวก';
+          }
+        }
+      });
+      if (newScore === undefined) return;
 
-      await fetch(`/api/admin/users/${keyId}/score`, {
+      const res = await fetch(`/api/admin/users/${keyId}/score`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ score: scoreInt })
+        body: JSON.stringify({ score: parseInt(newScore) })
       });
-      loadUsers();
+      if (res.ok) {
+        Swal.fire({ icon: 'success', title: 'อัปเดตคะแนนเรียบร้อย', timer: 1200, showConfirmButton: false });
+        loadUsers();
+      }
     }
 
     async function testServo(pinId, angleId) {
@@ -605,7 +695,13 @@
         body: JSON.stringify({ pin, angle })
       });
       const data = await res.json();
-      alert(`สั่งหมุนเซอร์โวขา GPIO ${data.pin} ไปที่ ${data.angle}° เรียบร้อย`);
+      Swal.fire({
+        icon: 'info',
+        title: 'ทดสอบเซอร์โวมอเตอร์',
+        html: `สั่งหมุนเซอร์โวขา <b>GPIO ${data.pin}</b> ไปที่ <b style="color: var(--primary); font-size: 20px;">${data.angle}°</b> เรียบร้อย`,
+        timer: 2000,
+        showConfirmButton: false
+      });
     }
 
     async function testUltrasonic(trigId, echoId) {
@@ -617,10 +713,28 @@
         body: JSON.stringify({ trig_pin, echo_pin })
       });
       const data = await res.json();
-      alert(`วัดระยะทางได้: ${data.distance_cm} cm`);
+      const isFull = data.distance_cm <= 30;
+      Swal.fire({
+        icon: isFull ? 'warning' : 'success',
+        title: 'ผลการวัดระยะ Ultrasonic',
+        html: `ระยะทางที่ตรวจจับได้: <b style="font-size: 26px; color: ${isFull ? '#ef4444' : '#10b981'};">${data.distance_cm} cm</b><br><br><span style="color: var(--text-muted); font-size: 13.5px;">(สถานะ: ${isFull ? '🚨 ถังเต็ม / วัตถุบังใกล้กว่าเกณฑ์ 30 cm' : '✅ ปกติ มีพื้นที่ว่าง'})</span>`,
+        confirmButtonColor: '#10b981'
+      });
     }
 
-    function logout() {
+    async function logout() {
+      const confirm = await Swal.fire({
+        title: 'ยืนยันออกจากระบบ?',
+        text: 'คุณต้องการออกจากระบบ Super Admin หรือไม่',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#374151',
+        confirmButtonText: 'ออกจากระบบ',
+        cancelButtonText: 'ยกเลิก'
+      });
+      if (!confirm.isConfirmed) return;
+
       localStorage.removeItem('gacha_token');
       localStorage.removeItem('gacha_user');
       token = '';
@@ -628,6 +742,14 @@
       document.getElementById('admin-login-user').value = '';
       document.getElementById('admin-login-phone').value = '';
       document.getElementById('admin-login-pin').value = '';
+
+      Swal.fire({
+        icon: 'success',
+        title: 'ออกจากระบบเรียบร้อย',
+        timer: 1200,
+        showConfirmButton: false
+      });
+
       checkAuth();
     }
 
