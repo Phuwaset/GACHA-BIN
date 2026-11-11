@@ -42,3 +42,7 @@ runs/
 *.cache
 *.onnx
 *.engine
+
+# Heavy temporary animations
+2_Kiosk_App/gif_animation/
+*.gif

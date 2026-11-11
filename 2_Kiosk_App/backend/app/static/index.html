@@ -282,7 +282,35 @@
 
     .reward-card.tier-special {
       border: 2px solid #ec4899;
-      box-shadow: 0 0 20px rgba(236, 72, 153, 0.25);
+      box-shadow: 0 0 25px rgba(236, 72, 153, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Holographic Foil Shimmer Streak across card */
+    .reward-card.tier-special::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        115deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.1) 48%,
+        rgba(236, 72, 153, 0.22) 50%,
+        rgba(255, 255, 255, 0.1) 52%,
+        transparent 65%
+      );
+      transform: translateX(-120%) rotate(25deg);
+      animation: foilShine 4.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes foilShine {
+      0%, 25% { transform: translateX(-120%) rotate(25deg); }
+      55%, 100% { transform: translateX(120%) rotate(25deg); }
     }
 
     .reward-card.tier-rare {
@@ -299,15 +327,86 @@
       padding: 4px 10px;
       border-radius: 12px;
       margin-bottom: 12px;
+      position: relative;
+      z-index: 2;
     }
 
     .badge-special { background: #ec4899; color: #fff; }
     .badge-rare { background: var(--accent-purple); color: #fff; }
     .badge-common { background: var(--primary); color: #fff; }
 
+    /* Floating Showcase Box (Zero-Resource Animation) */
+    .special-showcase-box {
+      width: 100%;
+      height: 210px;
+      margin: 6px 0 14px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Glowing Pulsing Aura */
+    .special-aura {
+      position: absolute;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.45) 0%, rgba(245, 158, 11, 0.22) 50%, transparent 70%);
+      animation: auraPulse 2.8s ease-in-out infinite;
+      filter: blur(10px);
+      z-index: 1;
+    }
+
+    @keyframes auraPulse {
+      0%, 100% { transform: scale(0.88); opacity: 0.65; }
+      50% { transform: scale(1.18); opacity: 1; }
+    }
+
+    /* Floating Hat Bob */
+    .special-art-wrap {
+      position: relative;
+      z-index: 2;
+      animation: floatBob 3s ease-in-out infinite;
+      will-change: transform;
+      filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55));
+    }
+
+    @keyframes floatBob {
+      0%, 100% { transform: translateY(0px) rotate(-1.5deg); }
+      50% { transform: translateY(-12px) rotate(2.5deg); }
+    }
+
+    /* Sparkling Stars */
+    .sparkle {
+      position: absolute;
+      z-index: 3;
+      user-select: none;
+      animation: sparkleTwinkle 2.2s ease-in-out infinite;
+    }
+    .sparkle-1 { top: 16px; left: 24px; animation-delay: 0s; color: #f472b6; font-size: 22px; }
+    .sparkle-2 { top: 20px; right: 26px; animation-delay: 0.7s; color: #fbbf24; font-size: 26px; }
+    .sparkle-3 { bottom: 24px; left: 30px; animation-delay: 1.4s; color: #67e8f9; font-size: 18px; }
+    .sparkle-4 { bottom: 20px; right: 24px; animation-delay: 1.0s; color: #fbbf24; font-size: 20px; }
+
+    @keyframes sparkleTwinkle {
+      0%, 100% { transform: scale(0.6) rotate(0deg); opacity: 0.35; }
+      50% { transform: scale(1.25) rotate(45deg); opacity: 1; filter: drop-shadow(0 0 8px currentColor); }
+    }
+
+    /* Floating Icons for Rare & Common */
     .reward-icon {
-      font-size: 54px;
-      margin-bottom: 10px;
+      font-size: 56px;
+      margin-bottom: 12px;
+      display: inline-block;
+      animation: iconFloat 3.5s ease-in-out infinite;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.4));
+    }
+    .reward-card.tier-rare .reward-icon { animation-delay: 0.5s; }
+
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
     }
 
     .reward-name {
@@ -560,7 +659,26 @@
             <!-- Special Tier -->
             <div class="reward-card tier-special">
               <span class="reward-tier-badge badge-special">SPECIAL 5%</span>
-              <div class="reward-icon">👒</div>
+              
+              <div class="special-showcase-box">
+                <div class="special-aura"></div>
+                <div class="sparkle sparkle-1">✦</div>
+                <div class="sparkle sparkle-2">★</div>
+                <div class="sparkle sparkle-3">✧</div>
+                <div class="sparkle sparkle-4">✦</div>
+                <div class="special-art-wrap">
+                  <svg class="special-svg" viewBox="0 0 200 160" width="160" height="130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="100" cy="70" rx="44" ry="46" fill="#FBBF24" />
+                    <path d="M56 84 C70 95 130 95 144 84 C142 92 138 96 100 98 C62 96 58 92 56 84 Z" fill="#EF4444" />
+                    <ellipse cx="100" cy="98" rx="86" ry="24" fill="#F59E0B" stroke="#D97706" stroke-width="3" />
+                    <ellipse cx="100" cy="96" rx="82" ry="20" fill="#FBBF24" />
+                    <path d="M68 64 Q100 80 132 64" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+                    <path d="M74 50 Q100 63 126 50" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+                    <ellipse cx="84" cy="46" rx="15" ry="7" fill="#FEF3C7" opacity="0.8" transform="rotate(-20 84 46)"/>
+                  </svg>
+                </div>
+              </div>
+
               <div class="reward-name">โมเดลลูฟี่ / หมวกฟาง</div>
               <div class="reward-rate">Art Toy แรร์ห้างดัง Miniso</div>
             </div>
