@@ -16,6 +16,7 @@ from app.config import (
     ADMIN_PHONE,
 )
 from app.hal import get_hardware_controller
+from app.hal.mock import MockHardwareController
 from app.services.db import SessionLocal, User, History
 from app.services.session_manager import session_manager
 from app.services.hardware import check_bin_status, execute_sorting
@@ -130,7 +131,7 @@ async def recycle_session_endpoint(websocket: WebSocket, key_id: str):
                         should_finish = True
                         break
                     elif action == "SIMULATE_DETECT":
-                        if user.role != "superadmin" and user.phone != ADMIN_PHONE:
+                        if not isinstance(hw, MockHardwareController) and user.role != "superadmin":
                             continue
                         sim_type = data.get("item_type", "plastic").lower()
                         pts = POINTS_PLASTIC if sim_type == "plastic" else POINTS_METAL
@@ -207,6 +208,9 @@ async def recycle_session_endpoint(websocket: WebSocket, key_id: str):
                             session_metal += 1
                         session_points += pts
 
+                        if detector is not None:
+                            detector.notify_sorting_completed()
+
                         await websocket.send_text(json.dumps({
                             "type": "ITEM_DETECTED",
                             "item_type": item_type,
@@ -215,7 +219,7 @@ async def recycle_session_endpoint(websocket: WebSocket, key_id: str):
                             "session_metal": session_metal,
                             "session_points": session_points,
                             "user_score": user.score,
-                            "cartoon_hold_sec": 5,
+                            "cartoon_hold_sec": 2,
                         }))
 
             # Stream preview frame

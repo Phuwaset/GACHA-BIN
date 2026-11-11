@@ -37,6 +37,7 @@ logger = logging.getLogger("gachabin.main")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle events."""
+    import asyncio
     logger.info("Initializing GACHA-BIN Database (Concept v2.0)...")
     init_db()
     ip = get_local_ip()
@@ -44,6 +45,9 @@ async def lifespan(app: FastAPI):
     logger.info("Kiosk Display Screen: http://%s:8000/", ip)
     logger.info("Mobile Web Remote:    http://%s:8000/m", ip)
     logger.info("Super Admin Portal:   http://%s:8000/admin", ip)
+    # Pre-warm YOLO model in background thread so active sessions have zero lag
+    from app.websocket.stream import get_detector
+    asyncio.create_task(asyncio.to_thread(get_detector))
     yield
     logger.info("GACHA-BIN Server shutting down.")
 

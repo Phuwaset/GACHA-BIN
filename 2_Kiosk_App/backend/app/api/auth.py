@@ -28,6 +28,7 @@ class LoginRequest(BaseModel):
     username: str = Field(..., min_length=1, max_length=50)
     phone: str = Field(..., description="Phone number starting with 0")
     pin: Optional[str] = Field(None, description="PIN code for superadmin accounts")
+    client_type: Optional[str] = Field("kiosk", description="Client context: 'kiosk' or 'admin'")
 
 
 def get_current_user(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)) -> User:
@@ -96,8 +97,12 @@ def login_or_register(payload: LoginRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="รหัส PIN ไม่ถูกต้อง")
         pin_limiter.success(cleaned_phone)
 
-    # Acquire session lock on Kiosk
-    is_active, is_queued, msg = session_manager.start_session(user)
+    # Acquire session lock on Kiosk only for recycling clients (not Admin portal)
+    if payload.client_type == "admin":
+        is_active, is_queued, msg = False, False, "Admin logged in"
+    else:
+        is_active, is_queued, msg = session_manager.start_session(user)
+
     token = tokens.issue(user.key_id, user.role, ttl_sec=3600)
 
     return {

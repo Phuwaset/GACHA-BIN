@@ -356,7 +356,7 @@
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, phone, pin })
+          body: JSON.stringify({ username, phone, pin, client_type: 'admin' })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || 'Login failed');

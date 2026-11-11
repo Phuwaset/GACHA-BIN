@@ -680,7 +680,7 @@
               </div>
 
               <div class="reward-name">โมเดลลูฟี่ / หมวกฟาง</div>
-              <div class="reward-rate">Art Toy แรร์ห้างดัง Miniso</div>
+              <div class="reward-rate">Art Toy แรร์</div>
             </div>
 
             <!-- Rare Tier -->
@@ -707,17 +707,17 @@
         <div class="bin-status-group">
           <div class="bin-indicator">
             <div id="dot-plastic" class="status-dot"></div>
-            <span>ถังขวดพลาสติก (Plastic):</span>
+            <span>ถังขวดพลาสติก (Plastic) +1 คะแนน :</span>
             <strong id="text-plastic-status" style="color: var(--primary);">พร้อมรับขยะ</strong>
           </div>
           <div class="bin-indicator">
             <div id="dot-metal" class="status-dot"></div>
-            <span>ถังกระป๋องโลหะ (Metal):</span>
+            <span>ถังกระป๋องโลหะ (Metal) +2 คะแนน :</span>
             <strong id="text-metal-status" style="color: var(--primary);">พร้อมรับขยะ</strong>
           </div>
         </div>
         <div style="font-size: 13.5px; color: var(--text-muted);">
-          ระบบคัดแยกอัตโนมัติด้วย Dual MG995 Servos & HC-SR04 Sensors
+          Design & Development By Phu@Developer
         </div>
       </footer>
     </main>
@@ -777,6 +777,15 @@
             <div style="font-size: 32px; margin-bottom: 4px;">🥫</div>
             <div style="font-size: 14px; color: var(--text-muted);">กระป๋องโลหะ (+2)</div>
             <div id="active-count-metal" style="font-family: var(--font-mono); font-size: 30px; font-weight: 800; color: var(--accent-amber);">0</div>
+          </div>
+        </div>
+
+        <!-- Dev Test Drop Simulator -->
+        <div style="background: rgba(31, 41, 55, 0.6); border: 1px dashed var(--border); border-radius: 16px; padding: 14px 18px; display: flex; gap: 10px; align-items: center; justify-content: space-between;">
+          <span style="font-size: 13px; color: var(--text-muted);">🧪 ทดสอบหย่อนขยะ (Dev Simulation):</span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary" style="font-size: 13px; padding: 8px 14px; border-radius: 10px; cursor: pointer; background: var(--primary); color: #fff; border: none;" onclick="simulateDrop('plastic')">+ จำลองขวดพลาสติก (+1)</button>
+            <button class="btn btn-accent" style="font-size: 13px; padding: 8px 14px; border-radius: 10px; cursor: pointer; background: var(--accent-purple); color: #fff; border: none;" onclick="simulateDrop('metal')">+ จำลองกระป๋อง (+2)</button>
           </div>
         </div>
       </div>
@@ -874,14 +883,34 @@
             if (msg.image) {
               document.getElementById('active-camera-stream').src = 'data:image/jpeg;base64,' + msg.image;
             }
-            if (msg.candidate_class) {
-              document.getElementById('ai-status-pill').innerText = `ตรวจจับ: ${msg.candidate_class.toUpperCase()} (${Math.round(msg.progress * 100)}%)`;
+            const pill = document.getElementById('ai-status-pill');
+            if (msg.waiting_for_exit) {
+              pill.innerText = '✅ ตรวจจับสำเร็จ รอช่องเปิด/หย่อนลงถัง...';
+              pill.style.background = 'rgba(16, 185, 129, 0.2)';
+              pill.style.color = '#10B981';
+            } else if (msg.progress > 0) {
+              pill.innerText = `⏳ กำลังตรวจจับ: ${msg.candidate_class.toUpperCase()} (ถือนิ่งๆ ${Math.round(msg.progress * 100)}%)`;
+              pill.style.background = 'rgba(245, 158, 11, 0.25)';
+              pill.style.color = '#F59E0B';
+            } else if (msg.candidate_class === 'cooldown') {
+              pill.innerText = '⚙️ คัดแยกสำเร็จ! กำลังเตรียมรับชิ้นถัดไป...';
+              pill.style.background = 'rgba(14, 165, 233, 0.2)';
+              pill.style.color = '#38BDF8';
+            } else if (msg.is_present && msg.candidate_class && msg.candidate_class !== 'empty') {
+              pill.innerText = `🔍 กำลังเล็ง: ${msg.candidate_class.toUpperCase()} (${Math.round((msg.confidence || 0) * 100)}%)`;
+              pill.style.background = 'rgba(59, 130, 246, 0.2)';
+              pill.style.color = '#60A5FA';
+            } else {
+              pill.innerText = '🎯 นำขวด/กระป๋องเล็งให้อยู่ในกรอบเป้าหมาย';
+              pill.style.background = 'var(--bg-card)';
+              pill.style.color = 'var(--text-muted)';
             }
           } else if (msg.type === 'ITEM_DETECTED') {
             document.getElementById('active-count-plastic').innerText = msg.session_plastic;
             document.getElementById('active-count-metal').innerText = msg.session_metal;
             document.getElementById('active-user-score').innerText = msg.user_score;
-            showCartoonModal(msg.item_type, msg.points_awarded);
+            const holdMs = (msg.cartoon_hold_sec || 2) * 1000;
+            showCartoonModal(msg.item_type, msg.points_awarded, holdMs);
           } else if (msg.type === 'BIN_FULL_WARNING') {
             alert(msg.message);
           }
@@ -898,7 +927,7 @@
       document.getElementById('view-standby').classList.add('active');
     }
 
-    function showCartoonModal(itemType, points) {
+    function showCartoonModal(itemType, points, holdMs = 2000) {
       const modal = document.getElementById('cartoon-modal');
       const title = document.getElementById('cartoon-title');
       const sub = document.getElementById('cartoon-sub');
@@ -906,7 +935,15 @@
       title.innerText = `+${points} คะแนน!`;
       sub.innerText = itemType === 'plastic' ? 'คัดแยกขวดพลาสติกเรียบร้อย' : 'คัดแยกกระป๋องโลหะเรียบร้อย';
       modal.style.display = 'flex';
-      setTimeout(() => { modal.style.display = 'none'; }, 5000);
+      setTimeout(() => { modal.style.display = 'none'; }, holdMs);
+    }
+
+    function simulateDrop(itemType) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: 'SIMULATE_DETECT', item_type: itemType }));
+      } else {
+        alert('WebSocket กล้องยังไม่ได้เชื่อมต่อ หรือไม่ได้อยู่ในเซสชัน');
+      }
     }
   </script>
 </body>

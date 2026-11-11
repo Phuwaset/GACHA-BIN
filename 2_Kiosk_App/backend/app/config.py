@@ -24,10 +24,10 @@ DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'gachabin.
 
 # Vision & AI
 MODEL_PATH: str = os.getenv("MODEL_PATH", str(DEFAULT_MODEL_PATH))
-CAMERA_INDEX: int = int(os.getenv("CAMERA_INDEX", "1"))
-CONFIDENCE_THRESHOLD: float = float(os.getenv("CONF_THRESHOLD", "0.88"))
-HOLD_DURATION_SEC: float = float(os.getenv("HOLD_DURATION_SEC", "1.2"))
-CONSECUTIVE_FRAMES: int = int(os.getenv("CONSECUTIVE_FRAMES", "8"))
+CAMERA_INDEX: int = int(os.getenv("CAMERA_INDEX", "0"))
+CONFIDENCE_THRESHOLD: float = float(os.getenv("CONF_THRESHOLD", "0.65"))
+HOLD_DURATION_SEC: float = float(os.getenv("HOLD_DURATION_SEC", "0.8"))
+CONSECUTIVE_FRAMES: int = int(os.getenv("CONSECUTIVE_FRAMES", "5"))
 DEBOUNCE_COOLDOWN_SEC: float = float(os.getenv("COOLDOWN_SEC", "2.0"))
 
 # Hardware Mode ('mock' or 'gpio')
