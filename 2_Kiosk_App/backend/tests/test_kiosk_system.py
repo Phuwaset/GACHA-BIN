@@ -98,6 +98,34 @@ class TestSecurityAndAuth(unittest.TestCase):
             cleaned = num.strip().replace("-", "").replace(" ", "")
             self.assertTrue(bool(PHONE_REGEX.match(cleaned)))
 
+    def test_username_phone_identity_check(self):
+        from fastapi import HTTPException
+        from app.api.auth import login_or_register, LoginRequest
+        from app.services.db import SessionLocal, User
+
+        with SessionLocal() as db:
+            # Register user
+            req1 = LoginRequest(username="Thanapat", phone="0877777777", client_type="viewer")
+            res1 = login_or_register(req1, db=db)
+            self.assertEqual(res1["username"], "Thanapat")
+
+            # Same user with case insensitivity
+            req_same = LoginRequest(username="thanapat", phone="0877777777", client_type="viewer")
+            res_same = login_or_register(req_same, db=db)
+            self.assertEqual(res_same["key_id"], res1["key_id"])
+
+            # Different user trying to use same phone
+            req_hijack = LoginRequest(username="Yagyang", phone="0877777777", client_type="viewer")
+            with self.assertRaises(HTTPException) as ctx:
+                login_or_register(req_hijack, db=db)
+            self.assertEqual(ctx.exception.status_code, 409)
+
+            # Cleanup
+            u = db.query(User).filter(User.phone == "0877777777").first()
+            if u:
+                db.delete(u)
+                db.commit()
+
 
 class TestDatabaseAndORM(unittest.TestCase):
     """Test SQLite database models, initialization, and transactions for Concept v2.0."""

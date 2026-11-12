@@ -32,11 +32,18 @@ def parse_args():
                     help="confidence threshold")
     ap.add_argument("--width", type=int, default=640, help="camera width")
     ap.add_argument("--height", type=int, default=480, help="camera height")
+    ap.add_argument("--roi", action="store_true", default=True,
+                    help="use center ROI crop matching kiosk chamber")
     return ap.parse_args()
 
 
 def main():
     args = parse_args()
+
+    import torch
+    if args.device == "0" and not torch.cuda.is_available():
+        print("[INFO] CUDA not available; auto fallback to CPU")
+        args.device = "cpu"
 
     # 1) โหลดโมเดล
     print(f"Loading model: {args.model}")

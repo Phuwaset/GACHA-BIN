@@ -30,6 +30,11 @@
       font-family: 'Prompt', 'Kanit', sans-serif;
     }
 
+    html, body {
+      overscroll-behavior-y: contain;
+      overscroll-behavior: none;
+    }
+
     body {
       background-color: var(--bg);
       color: var(--text);
@@ -177,17 +182,167 @@
     .status-waiting { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
     .status-claimed { background: rgba(148, 163, 184, 0.2); color: var(--text-muted); }
 
-    /* Modal */
+    /* Modal & Gacha Animation Styles */
     .modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
+      background: rgba(10, 15, 29, 0.94);
+      backdrop-filter: blur(12px);
       display: none;
       align-items: center;
       justify-content: center;
       padding: 20px;
       z-index: 100;
+      overflow: hidden;
+    }
+
+    .gacha-crank-box {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gacha-crank {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #334155 0%, #1e293b 80%);
+      border: 4px solid var(--border);
+      position: relative;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.6), inset 0 2px 6px rgba(255, 255, 255, 0.15);
+      animation: crankSpin 1.1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .crank-handle {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 58px; height: 14px;
+      background: linear-gradient(90deg, #94a3b8, #cbd5e1);
+      border-radius: 999px;
+      transform-origin: 8px center;
+      transform: translateY(-50%);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .crank-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--primary);
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    @keyframes crankSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(720deg); }
+    }
+
+    .capsule-wrap {
+      width: 130px;
+      height: 130px;
+      position: relative;
+      margin-bottom: 20px;
+      will-change: transform;
+    }
+
+    .capsule-top {
+      position: absolute;
+      top: 0; left: 0;
+      width: 130px; height: 68px;
+      border-radius: 65px 65px 8px 8px;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      box-shadow: inset 0 6px 10px rgba(255, 255, 255, 0.45), 0 4px 10px rgba(0, 0, 0, 0.35);
+      z-index: 2;
+      transition: transform 0.4s ease-out, opacity 0.3s;
+    }
+
+    .capsule-top::after {
+      content: '';
+      position: absolute;
+      top: 14px; left: 22px;
+      width: 36px; height: 18px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.45);
+      transform: rotate(-25deg);
+    }
+
+    .capsule-bottom {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 130px; height: 68px;
+      border-radius: 8px 8px 65px 65px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(203, 213, 225, 0.75));
+      box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.2), 0 10px 25px rgba(0, 0, 0, 0.4);
+      z-index: 1;
+      transition: transform 0.4s ease-out, opacity 0.3s;
+    }
+
+    .capsule-seam {
+      position: absolute;
+      top: 61px; left: -4px;
+      width: 138px; height: 8px;
+      background: #0f172a;
+      border-radius: 4px;
+      z-index: 3;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: opacity 0.2s;
+    }
+
+    .capsule-drop {
+      animation: capsuleDrop 1.3s cubic-bezier(0.28, 0.84, 0.42, 1) forwards;
+    }
+
+    @keyframes capsuleDrop {
+      0% { transform: translateY(-240px) scale(0.6) rotate(-20deg); opacity: 0; }
+      50% { transform: translateY(0px) scale(1.08, 0.92) rotate(8deg); opacity: 1; }
+      70% { transform: translateY(-38px) scale(0.96, 1.04) rotate(-5deg); }
+      85% { transform: translateY(0px) scale(1.03, 0.97) rotate(3deg); }
+      93% { transform: translateY(-12px) scale(1) rotate(-1deg); }
+      100% { transform: translateY(0px) scale(1) rotate(0deg); }
+    }
+
+    .capsule-rumble {
+      animation: capsuleRumble 0.12s infinite alternate;
+    }
+
+    @keyframes capsuleRumble {
+      0% { transform: translate(-3px, 1px) rotate(-3deg); }
+      100% { transform: translate(3px, -1px) rotate(3deg); }
+    }
+
+    .capsule-open .capsule-top {
+      transform: translateY(-50px) rotate(-25deg);
+      opacity: 0;
+    }
+    .capsule-open .capsule-bottom {
+      transform: translateY(50px) rotate(20deg);
+      opacity: 0;
+    }
+    .capsule-open .capsule-seam {
+      opacity: 0;
+    }
+
+    .tier-color-special {
+      background: linear-gradient(135deg, #f59e0b, #ec4899) !important;
+      box-shadow: 0 0 35px rgba(236, 72, 153, 0.7), inset 0 6px 12px rgba(255, 255, 255, 0.6) !important;
+    }
+    .tier-color-rare {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6) !important;
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.6), inset 0 6px 12px rgba(255, 255, 255, 0.5) !important;
+    }
+    .tier-color-common {
+      background: linear-gradient(135deg, #10b981, #06b6d4) !important;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.5), inset 0 6px 12px rgba(255, 255, 255, 0.5) !important;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.65); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -209,7 +364,7 @@
 
       <div class="input-group">
         <label>ชื่อผู้ใช้งาน (Username)</label>
-        <input type="text" id="input-username" placeholder="เช่น กานต์">
+        <input type="text" id="input-username" placeholder="Lisa Manoban">
       </div>
 
       <div class="input-group">
@@ -222,8 +377,15 @@
         <input type="password" id="input-pin" placeholder="PIN 6 หลัก (123456)">
       </div>
 
-      <button class="btn btn-primary" onclick="submitLogin()">เปิดเซสชันหน้าตู้ ➔</button>
-      <p id="login-error" style="color: var(--danger); font-size: 13.5px; margin-top: 10px;"></p>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+        <button class="btn btn-primary" onclick="submitLogin('kiosk')">
+          🌱 เปิดเซสชันหน้าตู้ (เริ่มหย่อนขยะ) ➔
+        </button>
+        <button class="btn btn-secondary" style="border: 1.5px solid var(--accent); color: var(--accent); font-weight: 600; background: rgba(139, 92, 246, 0.08);" onclick="submitLogin('viewer')">
+          🎁 เข้าสู่ระบบดูคะแนน สุ่มกาชา &amp; แลกรางวัล ➔
+        </button>
+      </div>
+      <p id="login-error" style="color: var(--danger); font-size: 13.5px; margin-top: 10px; text-align: center;"></p>
     </div>
 
     <!-- 2. QUEUE VIEW -->
@@ -237,17 +399,25 @@
     </div>
 
     <!-- 3. ACTIVE DASHBOARD VIEW -->
-    <div id="view-dashboard" style="display: none; display: flex; flex-direction: column; gap: 16px;">
+    <div id="view-dashboard" style="display: none; flex-direction: column; gap: 16px;">
       <!-- Score Banner -->
       <div class="card" style="border: 2px solid var(--primary); text-align: center;">
         <div style="font-size: 13.5px; color: var(--text-muted);">คะแนนสะสมคงเหลือ</div>
         <div style="font-family: 'Kanit'; font-size: 44px; font-weight: 800; color: var(--primary);">
           ⭐ <span id="dash-score">0</span>
         </div>
-        <p style="font-size: 12.5px; color: var(--text-muted);">
+        <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 4px;">
           ขวดพลาสติก = +1 แต้ม | กระป๋องโลหะ = +2 แต้ม
         </p>
+        <div id="live-sync-indicator" style="font-size: 11.5px; color: var(--primary); font-weight: 500;">
+          🟢 ระบบเชื่อมต่อตู้รีไซเคิลแบบเรียลไทม์
+        </div>
       </div>
+
+      <!-- Action Button to Open/Reactivate Kiosk Session -->
+      <button id="btn-open-kiosk" class="btn btn-primary" style="display: none; padding: 14px; font-size: 15px;" onclick="requestKioskSession()">
+        🌱 เปิดเซสชันหน้าตู้เพื่อหย่อนขยะ ➔
+      </button>
 
       <!-- Gacha Action Button -->
       <button id="btn-spin" class="btn btn-accent" onclick="spinGacha()">
@@ -271,17 +441,48 @@
     </div>
   </div>
 
-  <!-- Result Modal -->
+  <!-- Result Modal & Gacha Experience -->
   <div id="result-modal" class="modal">
-    <div class="card" style="width: 100%; max-width: 360px; text-align: center;">
-      <div id="modal-icon" style="font-size: 64px; margin-bottom: 10px;">🎉</div>
-      <h2 id="modal-title">ยินดีด้วย!</h2>
-      <p id="modal-msg" style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;"></p>
-      <div id="modal-code-wrap" style="background: var(--bg); border: 2px dashed var(--primary); border-radius: 12px; padding: 12px; margin-bottom: 18px;">
-        <div style="font-size: 11px; color: var(--text-muted);">รหัสสำหรับยื่นรับรางวัล</div>
-        <div id="modal-code" style="font-family: 'Kanit'; font-size: 26px; font-weight: 800; color: var(--primary);"></div>
+    <canvas id="confetti-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;"></canvas>
+
+    <!-- Phase 1: Crank Dispenser Stage -->
+    <div id="anim-crank-stage" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+      <div class="gacha-crank-box">
+        <div class="gacha-crank">
+          <div class="crank-handle"></div>
+          <div class="crank-center"></div>
+        </div>
       </div>
-      <button class="btn btn-primary" onclick="closeModal()">ตกลง</button>
+      <div style="font-family: 'Kanit'; font-size: 22px; font-weight: 700; color: #fff; margin-top: 18px;">กำลังหมุนกาชาปอง...</div>
+      <div style="font-size: 13.5px; color: var(--text-muted); margin-top: 4px;">ขอให้ได้รางวัลสุดพิเศษ ✨</div>
+    </div>
+
+    <!-- Phase 2: Capsule Drop & Rumble Stage -->
+    <div id="anim-capsule-stage" style="display: none; flex-direction: column; align-items: center; text-align: center;">
+      <div id="capsule-box" class="capsule-wrap">
+        <div id="capsule-top" class="capsule-top"></div>
+        <div class="capsule-bottom"></div>
+        <div class="capsule-seam"></div>
+      </div>
+      <div id="capsule-status-text" style="font-family: 'Kanit'; font-size: 22px; font-weight: 700; color: #fff; margin-top: 14px;">
+        ลูกบอลกำลังตกลงมา...
+      </div>
+      <div style="font-size: 13.5px; color: var(--text-muted); margin-top: 4px;">กำลังจะเปิดออกแล้ว! 🌟</div>
+    </div>
+
+    <!-- Phase 3: Reveal Result Card -->
+    <div id="anim-result-card" class="card" style="display: none; width: 100%; max-width: 360px; text-align: center; position: relative; z-index: 5;">
+      <div id="modal-tier-badge" style="font-family: 'Kanit'; font-size: 11.5px; font-weight: 800; padding: 4px 14px; border-radius: 999px; display: inline-block; margin-bottom: 12px; text-transform: uppercase;"></div>
+      <div id="modal-icon" style="font-size: 60px; margin-bottom: 8px;">🎉</div>
+      <h2 id="modal-title" style="font-size: 20px; line-height: 1.3; margin-bottom: 6px;">ยินดีด้วย!</h2>
+      <p id="modal-msg" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;"></p>
+      
+      <div id="modal-code-wrap" style="background: var(--bg); border: 2px dashed var(--primary); border-radius: 14px; padding: 12px; margin-bottom: 18px;">
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">รหัสสำหรับยื่นรับรางวัลกับเจ้าหน้าที่</div>
+        <div id="modal-code" style="font-family: 'Kanit'; font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px;"></div>
+      </div>
+      
+      <button class="btn btn-primary" onclick="closeModal()">ตกลง / เก็บตั๋วไว้ ➔</button>
     </div>
   </div>
 
@@ -289,8 +490,35 @@
     let token = localStorage.getItem('gacha_token') || '';
     let userData = null;
     let pollInterval = null;
+    let syncInterval = null;
 
-    async function submitLogin() {
+    // Automatic session restore on page load or accidental refresh
+    document.addEventListener('DOMContentLoaded', initSession);
+
+    async function initSession() {
+      token = localStorage.getItem('gacha_token') || '';
+      if (!token) return;
+
+      try {
+        const res = await fetch('/api/auth/me?_t=' + Date.now(), {
+          headers: { 'Authorization': 'Bearer ' + token },
+          cache: 'no-store'
+        });
+        if (!res.ok) {
+          localStorage.removeItem('gacha_token');
+          token = '';
+          return;
+        }
+        const data = await res.json();
+        userData = data;
+
+        handleSessionState(data);
+      } catch (e) {
+        console.warn('[Sync] Session restore failed:', e);
+      }
+    }
+
+    async function submitLogin(mode = 'kiosk') {
       const username = document.getElementById('input-username').value.trim();
       const phone = document.getElementById('input-phone').value.trim();
       const pin = document.getElementById('input-pin').value.trim();
@@ -311,7 +539,7 @@
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, phone, pin: pin || null })
+          body: JSON.stringify({ username, phone, pin: pin || null, client_type: mode })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || 'Login error');
@@ -341,16 +569,55 @@
         document.getElementById('btn-admin-panel').style.display = 'flex';
       }
 
-      if (data.is_active_session) {
+      if (data.is_queued) {
+        stopLiveSync();
+        document.getElementById('view-dashboard').style.display = 'none';
+        document.getElementById('view-queue').style.display = 'block';
+        document.getElementById('queue-msg').innerText = data.message || 'กำลังมีผู้ใช้งานอยู่ กรุณารอสักครู่...';
+        startPollingQueue();
+      } else {
+        if (pollInterval) {
+          clearInterval(pollInterval);
+          pollInterval = null;
+        }
         document.getElementById('view-queue').style.display = 'none';
         document.getElementById('view-dashboard').style.display = 'flex';
         updateDashboard(data);
         loadTickets();
-      } else {
-        document.getElementById('view-dashboard').style.display = 'none';
-        document.getElementById('view-queue').style.display = 'block';
-        document.getElementById('queue-msg').innerText = data.message;
-        startPollingQueue();
+        startLiveSync(); // Start real-time score polling
+      }
+    }
+
+    function startLiveSync() {
+      if (syncInterval) clearInterval(syncInterval);
+      syncInterval = setInterval(async () => {
+        if (!token) return;
+        try {
+          const res = await fetch('/api/auth/me?_t=' + Date.now(), {
+            headers: { 'Authorization': 'Bearer ' + token },
+            cache: 'no-store'
+          });
+          if (!res.ok) {
+            if (res.status === 401) {
+              stopLiveSync();
+              logout(true);
+            }
+            return;
+          }
+          const data = await res.json();
+          userData = data;
+
+          updateDashboard(data);
+        } catch (e) {
+          console.warn('[Sync] Polling error:', e);
+        }
+      }, 1000);
+    }
+
+    function stopLiveSync() {
+      if (syncInterval) {
+        clearInterval(syncInterval);
+        syncInterval = null;
       }
     }
 
@@ -358,10 +625,11 @@
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(async () => {
         try {
-          const res = await fetch('/api/auth/session/status');
+          const res = await fetch('/api/auth/session/status?_t=' + Date.now(), { cache: 'no-store' });
           const data = await res.json();
-          if (data.active_key_id === userData.key_id) {
+          if (userData && data.active_key_id === userData.key_id) {
             clearInterval(pollInterval);
+            pollInterval = null;
             userData.is_active_session = true;
             handleSessionState(userData);
           }
@@ -370,53 +638,271 @@
     }
 
     function updateDashboard(data) {
-      document.getElementById('dash-score').innerText = data.score;
-      document.getElementById('btn-spin').disabled = data.score < 20;
+      const scoreEl = document.getElementById('dash-score');
+      const oldScore = parseInt(scoreEl.innerText) || 0;
+      const newScore = data.score !== undefined ? data.score : 0;
+
+      if (newScore !== oldScore) {
+        scoreEl.innerText = newScore;
+        // Subtle bounce animation on score change
+        scoreEl.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        scoreEl.style.display = 'inline-block';
+        scoreEl.style.transform = 'scale(1.35)';
+        setTimeout(() => {
+          scoreEl.style.transform = 'scale(1)';
+        }, 250);
+        console.log('[LiveSync] Score updated:', oldScore, '->', newScore);
+      }
+      document.getElementById('btn-spin').disabled = newScore < 20;
+
+      // Update live sync indicator & open-kiosk button
+      const ind = document.getElementById('live-sync-indicator');
+      const openBtn = document.getElementById('btn-open-kiosk');
+      if (data.is_active_session) {
+        const rem = data.time_remaining_sec || 0;
+        if (ind) {
+          ind.innerHTML = `🟢 หน้าตู้กำลังทำงานพร้อมรับขยะ (${rem}s)`;
+          ind.style.color = '#10b981';
+        }
+        if (openBtn) openBtn.style.display = 'none';
+      } else {
+        if (ind) {
+          ind.innerHTML = `⚪ เซสชันหน้าตู้ยังไม่เปิด (กดปุ่มด้านล่างเพื่อเปิดเซสชัน)`;
+          ind.style.color = 'var(--text-muted)';
+        }
+        if (openBtn) openBtn.style.display = 'block';
+      }
+    }
+
+    async function requestKioskSession() {
+      if (!token) return;
+      try {
+        const res = await fetch('/api/auth/session/acquire', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'ไม่สามารถเปิดเซสชันได้');
+
+        if (data.is_queued) {
+          handleSessionState({ ...(userData || {}), is_queued: true, message: data.message });
+        } else {
+          Swal.fire({
+            icon: 'success',
+            title: 'เปิดเซสชันหน้าตู้สำเร็จ!',
+            text: 'หน้าตู้พร้อมรับขวดและกระป๋องของคุณแล้ว',
+            timer: 1600,
+            showConfirmButton: false
+          });
+          if (userData) {
+            userData.is_active_session = true;
+            userData.time_remaining_sec = data.time_remaining_sec;
+          }
+          updateDashboard({ ...(userData || {}), is_active_session: true, time_remaining_sec: data.time_remaining_sec });
+        }
+      } catch (e) {
+        Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: e.message });
+      }
     }
 
     async function spinGacha() {
       const btn = document.getElementById('btn-spin');
       btn.disabled = true;
+
+      // Modal elements
+      const modal = document.getElementById('result-modal');
+      const crankStage = document.getElementById('anim-crank-stage');
+      const capsuleStage = document.getElementById('anim-capsule-stage');
+      const resultCard = document.getElementById('anim-result-card');
+      const capsuleBox = document.getElementById('capsule-box');
+      const capsuleTop = document.getElementById('capsule-top');
+      const statusText = document.getElementById('capsule-status-text');
+
+      // Reset modal stages
+      crankStage.style.display = 'flex';
+      capsuleStage.style.display = 'none';
+      resultCard.style.display = 'none';
+      capsuleBox.className = 'capsule-wrap';
+      modal.style.display = 'flex';
+
+      let spinData = null;
+      let fetchError = null;
+
+      // 1. Stage 1: Crank Turning & Optimistic API Pre-fetch (1.1s)
       try {
-        const res = await fetch('/api/gacha/spin', {
+        const fetchPromise = fetch('/api/gacha/spin', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + token }
+        }).then(async res => {
+          const json = await res.json();
+          if (!res.ok) throw new Error(json.detail || 'Spin failed');
+          return json;
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Spin failed');
 
-        document.getElementById('dash-score').innerText = data.remaining_score;
-        document.getElementById('btn-spin').disabled = data.remaining_score < 20;
-
-        // Show result modal
-        const modal = document.getElementById('result-modal');
-        if (data.status === 'won') {
-          document.getElementById('modal-icon').innerText = '🎉';
-          document.getElementById('modal-title').innerText = 'ได้รับ: ' + data.reward_name;
-          document.getElementById('modal-msg').innerText = data.message;
-          document.getElementById('modal-code').innerText = data.claim_code;
-        } else {
-          document.getElementById('modal-icon').innerText = '🤖🙏';
-          document.getElementById('modal-title').innerText = 'ของรางวัลหมดชั่วคราว';
-          document.getElementById('modal-msg').innerText = data.message;
-          document.getElementById('modal-code').innerText = data.claim_code;
-        }
-        modal.style.display = 'flex';
-        loadTickets();
+        // Parallel wait: ensure minimum 1.1s crank spin animation
+        const [data] = await Promise.all([
+          fetchPromise,
+          new Promise(r => setTimeout(r, 1100))
+        ]);
+        spinData = data;
       } catch (e) {
-        alert(e.message);
-        btn.disabled = false;
+        fetchError = e;
       }
+
+      if (fetchError) {
+        modal.style.display = 'none';
+        Swal.fire({
+          icon: 'error',
+          title: 'ไม่สามารถหมุนกาชาปองได้',
+          text: fetchError.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+          confirmButtonColor: '#ef4444'
+        });
+        btn.disabled = false;
+        return;
+      }
+
+      // Update remaining score in background
+      document.getElementById('dash-score').innerText = spinData.remaining_score;
+      btn.disabled = spinData.remaining_score < 20;
+
+      // 2. Stage 2: Capsule Drop & Bounce (1.4s)
+      crankStage.style.display = 'none';
+      capsuleStage.style.display = 'flex';
+
+      const tier = (spinData.tier || 'common').toLowerCase();
+      capsuleTop.className = 'capsule-top tier-color-' + tier;
+      capsuleBox.className = 'capsule-wrap capsule-drop';
+      statusText.innerText = 'ลูกบอลกาชาปองกำลังตกลงมา...';
+
+      // 3. Stage 3: Capsule Rumble & Crack suspense (1.3s)
+      await new Promise(r => setTimeout(r, 1400));
+      capsuleBox.className = 'capsule-wrap capsule-rumble';
+      statusText.innerText = '✨ ไข่กาชาปองกำลังจะเปิดออกแล้ว...! ✨';
+
+      // 4. Stage 4: Pop Open & Reveal Card (t = 3.8s total)
+      await new Promise(r => setTimeout(r, 1300));
+      capsuleBox.className = 'capsule-wrap capsule-open';
+
+      await new Promise(r => setTimeout(r, 380));
+      capsuleStage.style.display = 'none';
+
+      // Populate Result Card
+      const tierBadge = document.getElementById('modal-tier-badge');
+      const modalIcon = document.getElementById('modal-icon');
+      const modalTitle = document.getElementById('modal-title');
+      const modalMsg = document.getElementById('modal-msg');
+      const modalCode = document.getElementById('modal-code');
+
+      if (tier === 'special') {
+        tierBadge.style.background = 'linear-gradient(135deg, #f59e0b, #ec4899)';
+        tierBadge.style.color = '#fff';
+        tierBadge.innerText = '🌟 SPECIAL REWARD (5%)';
+        modalIcon.innerText = '👑';
+        resultCard.style.border = '2px solid #ec4899';
+        resultCard.style.boxShadow = '0 0 35px rgba(236, 72, 153, 0.5)';
+        // Launch celebration confetti fireworks!
+        launchConfetti();
+      } else if (tier === 'rare') {
+        tierBadge.style.background = 'linear-gradient(135deg, #8b5cf6, #3b82f6)';
+        tierBadge.style.color = '#fff';
+        tierBadge.innerText = '✨ RARE REWARD (25%)';
+        modalIcon.innerText = '🎒';
+        resultCard.style.border = '2px solid var(--accent)';
+        resultCard.style.boxShadow = '0 0 25px rgba(139, 92, 246, 0.4)';
+      } else {
+        tierBadge.style.background = 'linear-gradient(135deg, #10b981, #06b6d4)';
+        tierBadge.style.color = '#fff';
+        tierBadge.innerText = '🌿 COMMON REWARD (70%)';
+        modalIcon.innerText = '🔑';
+        resultCard.style.border = '2px solid var(--primary)';
+        resultCard.style.boxShadow = '0 0 25px rgba(16, 185, 129, 0.4)';
+      }
+
+      modalTitle.innerText = spinData.reward_name;
+      modalMsg.innerText = spinData.message;
+      modalCode.innerText = spinData.claim_code;
+
+      resultCard.style.display = 'block';
+      resultCard.style.animation = 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+
+      loadTickets();
+    }
+
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#f59e0b', '#ec4899', '#38bdf8', '#10b981', '#fbbf24', '#ffffff'];
+
+      for (let i = 0; i < 65; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 9 + 4;
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 3.5,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotationSpeed: Math.random() * 12 - 6,
+          alpha: 1.0,
+          gravity: 0.18,
+        });
+      }
+
+      let animId;
+      const startTime = Date.now();
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const elapsed = Date.now() - startTime;
+        let active = 0;
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.rotation += p.rotationSpeed;
+          p.alpha = Math.max(0, 1 - elapsed / 2800);
+
+          if (p.alpha > 0) {
+            active++;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+            ctx.restore();
+          }
+        }
+
+        if (active > 0 && elapsed < 3000) {
+          animId = requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          cancelAnimationFrame(animId);
+        }
+      }
+      render();
     }
 
     async function loadTickets() {
+      if (!token) return;
       try {
-        const res = await fetch('/api/gacha/my-tickets', {
-          headers: { 'Authorization': 'Bearer ' + token }
+        const res = await fetch('/api/gacha/my-tickets?_t=' + Date.now(), {
+          headers: { 'Authorization': 'Bearer ' + token },
+          cache: 'no-store'
         });
         if (!res.ok) return;
         const tickets = await res.json();
         const list = document.getElementById('tickets-list');
+        if (!list) return;
         if (tickets.length === 0) {
           list.innerHTML = '<p style="color: var(--text-muted); font-size: 13.5px;">ยังไม่มีตั๋วของรางวัล</p>';
           return;
@@ -435,27 +921,38 @@
             </div>
           </div>
         `).join('');
-      } catch (e) {}
+      } catch (e) {
+        console.warn('[Tickets] Error loading tickets:', e);
+      }
     }
 
     function closeModal() {
-      document.getElementById('result-modal').style.display = 'none';
+      const modal = document.getElementById('result-modal');
+      modal.style.display = 'none';
+      const canvas = document.getElementById('confetti-canvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
     }
 
-    async function logout() {
-      const confirm = await Swal.fire({
-        title: 'ออกจากเซสชัน?',
-        text: 'ต้องการสิ้นสุดรอบการใช้งานหน้าตู้ GACHA-BIN ใช่หรือไม่',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#334155',
-        confirmButtonText: 'ออกจากระบบ',
-        cancelButtonText: 'ยกเลิก'
-      });
-      if (!confirm.isConfirmed) return;
+    async function logout(silent = false) {
+      if (!silent) {
+        const confirm = await Swal.fire({
+          title: 'ออกจากเซสชัน?',
+          text: 'ต้องการสิ้นสุดรอบการใช้งานหน้าตู้ GACHA-BIN ใช่หรือไม่',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#334155',
+          confirmButtonText: 'ออกจากระบบ',
+          cancelButtonText: 'ยกเลิก'
+        });
+        if (!confirm.isConfirmed) return;
+      }
 
       if (pollInterval) clearInterval(pollInterval);
+      stopLiveSync();
       try {
         await fetch('/api/auth/session/logout', {
           method: 'POST',

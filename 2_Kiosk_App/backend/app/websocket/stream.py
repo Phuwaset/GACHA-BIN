@@ -14,6 +14,7 @@ from app.config import (
     POINTS_PLASTIC,
     POINTS_METAL,
     ADMIN_PHONE,
+    CARTOON_HOLD_SEC,
 )
 from app.hal import get_hardware_controller
 from app.hal.mock import MockHardwareController
@@ -219,7 +220,7 @@ async def recycle_session_endpoint(websocket: WebSocket, key_id: str):
                             "session_metal": session_metal,
                             "session_points": session_points,
                             "user_score": user.score,
-                            "cartoon_hold_sec": 2,
+                            "cartoon_hold_sec": CARTOON_HOLD_SEC,
                         }))
 
             # Stream preview frame

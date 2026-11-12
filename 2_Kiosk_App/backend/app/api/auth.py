@@ -1,7 +1,7 @@
 """Authentication, Session Management, and Role-Based Access Endpoints."""
 import re
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from app.config import SUPERADMIN_PHONE, SUPERADMIN_DEFAULT_PIN
@@ -28,7 +28,7 @@ class LoginRequest(BaseModel):
     username: str = Field(..., min_length=1, max_length=50)
     phone: str = Field(..., description="Phone number starting with 0")
     pin: Optional[str] = Field(None, description="PIN code for superadmin accounts")
-    client_type: Optional[str] = Field("kiosk", description="Client context: 'kiosk' or 'admin'")
+    client_type: Optional[str] = Field("kiosk", description="Client context: 'kiosk', 'admin', or 'viewer'")
 
 
 def get_current_user(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)) -> User:
@@ -77,6 +77,13 @@ def login_or_register(payload: LoginRequest, db: Session = Depends(get_db)):
         db.add(user)
         db.commit()
         db.refresh(user)
+    else:
+        # Identity match verification: verify entered name matches registered account (case-insensitive)
+        if user.username.strip().lower() != cleaned_name.lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"เบอร์โทรศัพท์นี้ลงทะเบียนไว้แล้วในชื่อคุณ '{user.username}' หากเป็นบัญชีของคุณ กรุณากรอกชื่อให้ตรงกับที่ลงทะเบียน",
+            )
 
     # Super Admin PIN check
     if user.role == "superadmin" or cleaned_phone == SUPERADMIN_PHONE:
@@ -97,9 +104,9 @@ def login_or_register(payload: LoginRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="รหัส PIN ไม่ถูกต้อง")
         pin_limiter.success(cleaned_phone)
 
-    # Acquire session lock on Kiosk only for recycling clients (not Admin portal)
-    if payload.client_type == "admin":
-        is_active, is_queued, msg = False, False, "Admin logged in"
+    # Acquire session lock on Kiosk only for recycling clients (not Admin portal or Viewer mode)
+    if payload.client_type in ("admin", "viewer"):
+        is_active, is_queued, msg = False, False, "Viewer logged in"
     else:
         is_active, is_queued, msg = session_manager.start_session(user)
 
@@ -119,9 +126,44 @@ def login_or_register(payload: LoginRequest, db: Session = Depends(get_db)):
     }
 
 
+@router.get("/me")
+def get_me(response: Response, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Return authenticated user profile, real-time score, and live session status."""
+    # Bust mobile browser aggressive HTTP caching
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    # Refresh user instance to guarantee latest committed score from stream.py
+    try:
+        db.refresh(current_user)
+    except Exception:
+        pass
+
+    status_info = session_manager.get_status()
+    is_active = (status_info.get("active_key_id") == current_user.key_id)
+    is_queued = current_user.key_id in status_info.get("queue", [])
+
+    return {
+        "key_id": current_user.key_id,
+        "username": current_user.username,
+        "phone": current_user.phone,
+        "score": current_user.score,
+        "total_score": current_user.total_score,
+        "role": current_user.role,
+        "is_active_session": is_active,
+        "is_queued": is_queued,
+        "time_remaining_sec": status_info.get("time_remaining_sec", 0),
+    }
+
+
 @router.get("/session/status")
-def get_session_status():
+def get_session_status(response: Response):
     """Real-time status endpoint polled by Kiosk Standby Screen and Mobile clients."""
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     status_info = session_manager.get_status()
     bin_status = check_bin_status()
     ip = get_local_ip()
@@ -133,6 +175,18 @@ def get_session_status():
         "wifi_ssid": ssid,
         "bin_status": bin_status,
         "mobile_url": f"http://{ip}:8000/m",
+    }
+
+
+@router.post("/session/acquire")
+def acquire_session(current_user: User = Depends(get_current_user)):
+    """Acquire or renew kiosk active session for an already authenticated mobile user."""
+    is_active, is_queued, msg = session_manager.start_session(current_user)
+    return {
+        "is_active_session": is_active,
+        "is_queued": is_queued,
+        "message": msg,
+        "time_remaining_sec": session_manager.get_status().get("time_remaining_sec", 0),
     }
 
 

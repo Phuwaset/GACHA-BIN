@@ -548,6 +548,7 @@
       if (res.ok) {
         Swal.fire({ icon: 'success', title: 'ส่งมอบสำเร็จ', timer: 1200, showConfirmButton: false });
         loadClaims();
+        loadRewards();
       } else {
         Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาดในการบันทึกส่งมอบ', confirmButtonColor: '#ef4444' });
       }

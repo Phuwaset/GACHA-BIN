@@ -39,9 +39,61 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: var(--bg-base);
+      background:
+        radial-gradient(ellipse 65% 55% at 8% 12%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 45% at 92% 88%, rgba(5, 150, 105, 0.09) 0%, transparent 60%),
+        var(--bg-base);
       color: var(--text-main);
       font-family: var(--font-body);
+    }
+
+    .brand-logo-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-badge-eco {
+      position: absolute;
+      bottom: -4px;
+      right: -8px;
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    }
+
+    .eco-plant-decor {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      opacity: 0.85;
+      animation: ecoSway 3.5s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+    }
+
+    @keyframes ecoSway {
+      0% { transform: rotate(-3deg); }
+      100% { transform: rotate(5deg); }
+    }
+
+    .eco-leaf-banner {
+      margin-top: 14px;
+      padding: 6px 14px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.28);
+      border-radius: 999px;
+      font-size: 12.5px;
+      color: #6ee7b7;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
     }
 
     #app {
@@ -607,10 +659,13 @@
     <!-- Header -->
     <header>
       <div class="brand">
-        <span class="brand-logo">♻️</span>
+        <div class="brand-logo-wrap">
+          <span class="brand-logo">🌱</span>
+          <span class="brand-badge-eco">ECO</span>
+        </div>
         <div>
-          <div class="brand-title">GACHA-BIN</div>
-          <div class="brand-subtitle">Smart Vision Recycling Kiosk</div>
+          <div class="brand-title">GACHA-BIN <span style="font-size: 19px; font-weight: 500; color: #34d399;">🍃</span></div>
+          <div class="brand-subtitle">Smart Vision Eco-Recycling Kiosk · รักษ์โลกสะสมแต้ม</div>
         </div>
       </div>
 
@@ -637,12 +692,26 @@
       <div class="standby-main-grid">
         <!-- Left QR Code Card -->
         <div class="qr-card">
-          <div class="qr-tag">SCAN TO PLAY</div>
+          <div class="qr-tag">🌱 SCAN TO RECYCLE &amp; GROW</div>
+
+          <!-- Subtle swaying organic sprout icon -->
+          <div class="eco-plant-decor" title="Green Planet">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 10v10"/>
+              <path d="M12 10a5 5 0 0 1 5-5c0 4-3 5-5 5z"/>
+              <path d="M12 14a5 5 0 0 0-5-5c0 4 3 5 5 5z"/>
+            </svg>
+          </div>
+
           <div class="qr-box">
             <img id="qr-image" src="/api/qr" alt="Scan QR to Login">
           </div>
-          <h2 class="qr-instruction">สแกน QR Code ด้วยมือถือ</h2>
-          <p class="qr-subtext">เพื่อลงทะเบียน / เปิดเซสชันสะสมแต้มหน้าตู้</p>
+          <h2 class="qr-instruction">สแกน QR ร่วมฟื้นฟูโลก 🌿</h2>
+          <p class="qr-subtext">ลงทะเบียนสะสมแต้มรีไซเคิล แลกของรางวัลสุดพิเศษ</p>
+
+          <div class="eco-leaf-banner">
+            <span>🍃 ทุก 1 ชิ้น = ลดขยะสู่สิ่งแวดล้อม</span>
+          </div>
         </div>
 
         <!-- Right Rewards Showcase -->
@@ -650,7 +719,7 @@
           <div class="showcase-header">
             <div class="showcase-title">
               <span>🎁</span>
-              <span>ของรางวัลสุดพิเศษ (Gacha Rewards)</span>
+              <span>ของรางวัลรักษ์โลก (Eco Gacha Rewards)</span>
             </div>
             <div class="showcase-cost-badge">✨ 20 แต้ม / สุ่ม 1 ครั้ง</div>
           </div>
@@ -707,17 +776,17 @@
         <div class="bin-status-group">
           <div class="bin-indicator">
             <div id="dot-plastic" class="status-dot"></div>
-            <span>ถังขวดพลาสติก (Plastic) +1 คะแนน :</span>
+            <span>🌱 ถังขวดพลาสติก (Plastic) +1 คะแนน :</span>
             <strong id="text-plastic-status" style="color: var(--primary);">พร้อมรับขยะ</strong>
           </div>
           <div class="bin-indicator">
             <div id="dot-metal" class="status-dot"></div>
-            <span>ถังกระป๋องโลหะ (Metal) +2 คะแนน :</span>
+            <span>🥫 ถังกระป๋องโลหะ (Metal) +2 คะแนน :</span>
             <strong id="text-metal-status" style="color: var(--primary);">พร้อมรับขยะ</strong>
           </div>
         </div>
-        <div style="font-size: 13.5px; color: var(--text-muted);">
-          Design & Development By Phu@Developer
+        <div style="font-size: 13.5px; color: #6ee7b7; display: flex; align-items: center; gap: 6px;">
+          <span>🌿</span> GACHA-BIN Green Tech by Phu@Developer
         </div>
       </footer>
     </main>
@@ -769,23 +838,14 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 4px;">🧴</div>
-            <div style="font-size: 14px; color: var(--text-muted);">ขวดพลาสติก (+1)</div>
+            <div style="font-size: 14px; color: var(--text-muted);">ขวดพลาสติก (+1) 🌱</div>
             <div id="active-count-plastic" style="font-family: var(--font-mono); font-size: 30px; font-weight: 800; color: var(--primary);">0</div>
           </div>
 
           <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; text-align: center;">
             <div style="font-size: 32px; margin-bottom: 4px;">🥫</div>
-            <div style="font-size: 14px; color: var(--text-muted);">กระป๋องโลหะ (+2)</div>
+            <div style="font-size: 14px; color: var(--text-muted);">กระป๋องโลหะ (+2) 🍃</div>
             <div id="active-count-metal" style="font-family: var(--font-mono); font-size: 30px; font-weight: 800; color: var(--accent-amber);">0</div>
-          </div>
-        </div>
-
-        <!-- Dev Test Drop Simulator -->
-        <div style="background: rgba(31, 41, 55, 0.6); border: 1px dashed var(--border); border-radius: 16px; padding: 14px 18px; display: flex; gap: 10px; align-items: center; justify-content: space-between;">
-          <span style="font-size: 13px; color: var(--text-muted);">🧪 ทดสอบหย่อนขยะ (Dev Simulation):</span>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-primary" style="font-size: 13px; padding: 8px 14px; border-radius: 10px; cursor: pointer; background: var(--primary); color: #fff; border: none;" onclick="simulateDrop('plastic')">+ จำลองขวดพลาสติก (+1)</button>
-            <button class="btn btn-accent" style="font-size: 13px; padding: 8px 14px; border-radius: 10px; cursor: pointer; background: var(--accent-purple); color: #fff; border: none;" onclick="simulateDrop('metal')">+ จำลองกระป๋อง (+2)</button>
           </div>
         </div>
       </div>
@@ -819,7 +879,7 @@
     // Poll session & network status
     async function pollStatus() {
       try {
-        const res = await fetch('/api/auth/session/status');
+        const res = await fetch('/api/auth/session/status?_t=' + Date.now(), { cache: 'no-store' });
         if (!res.ok) return;
         const data = await res.json();
 
@@ -936,14 +996,6 @@
       sub.innerText = itemType === 'plastic' ? 'คัดแยกขวดพลาสติกเรียบร้อย' : 'คัดแยกกระป๋องโลหะเรียบร้อย';
       modal.style.display = 'flex';
       setTimeout(() => { modal.style.display = 'none'; }, holdMs);
-    }
-
-    function simulateDrop(itemType) {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ action: 'SIMULATE_DETECT', item_type: itemType }));
-      } else {
-        alert('WebSocket กล้องยังไม่ได้เชื่อมต่อ หรือไม่ได้อยู่ในเซสชัน');
-      }
     }
   </script>
 </body>
